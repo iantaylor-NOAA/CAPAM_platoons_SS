@@ -16,16 +16,6 @@ if(FALSE){
 }
 
 
-# read files from Richard McGarvey
-agelen <- read.table(file.path(mydir, 'Oct29_files/AGE-LENGTH41.OUT'),
-                     skip = 2, header = TRUE)
-cwe <- read.table(file.path(mydir, 'Oct29_files/CwEByMonth.OUT'),
-                  skip = 1, header = TRUE)
-
-# subset to simulation 1 only
-agelen1 <- agelen[agelen$irun == 1,]
-cwe1 <- cwe[cwe$RUN == 1,]
-
 yrs <- 1990:2019
 
 
@@ -235,6 +225,17 @@ mydir.today <- 'c:/SS/McGarvey/CAPAM_platoons_runs_Oct29'
 mydir.today2 <- 'c:/SS/McGarvey/CAPAM_no_platoons_runs_Oct29'
 
 if(FALSE){
+
+  # read files from Richard McGarvey
+  agelen <- read.table(file.path(mydir, 'Oct29_files/AGE-LENGTH41.OUT'),
+                       skip = 2, header = TRUE)
+  cwe <- read.table(file.path(mydir, 'Oct29_files/CwEByMonth.OUT'),
+                    skip = 1, header = TRUE)
+
+  # subset to simulation 1 only
+  agelen1 <- agelen[agelen$irun == 1,]
+  cwe1 <- cwe[cwe$RUN == 1,]
+
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
   build_models(run = 1:20, updatedat = TRUE)
   p1 <- SS_output('c:/SS/McGarvey//CAPAM_platoons_runs_Oct29/CAPAM_platoons_run001')
@@ -256,9 +257,12 @@ if(FALSE){
   for(idir in dirs2){
     remove_platoons(idir)
   }
+
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
   SSutils::run_SS_models(dirvec = dir(mydir.today[1:20], full.names = TRUE),
-                                      systemcmd = TRUE, skipfinished = FALSE)
+                         systemcmd = TRUE, skipfinished = FALSE,
+                         intern = TRUE)
+  source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
   SSutils::run_SS_models(dirvec = dir(mydir.today2[1:20], full.names = TRUE),
                                       systemcmd = TRUE, skipfinished = FALSE)
 }
