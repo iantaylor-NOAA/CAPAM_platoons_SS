@@ -17,9 +17,9 @@ if(FALSE){
 
 
 # read files from Richard McGarvey
-agelen <- read.table(file.path(mydir, 'ibmdatafirstsetof100runs/AGE-LENGTH41.OUT'),
+agelen <- read.table(file.path(mydir, 'Oct29_files/AGE-LENGTH41.OUT'),
                      skip = 2, header = TRUE)
-cwe <- read.table(file.path(mydir, 'ibmdatafirstsetof100runs/CwEByMonth.OUT'),
+cwe <- read.table(file.path(mydir, 'Oct29_files/CwEByMonth.OUT'),
                   skip = 1, header = TRUE)
 
 # subset to simulation 1 only
@@ -32,7 +32,7 @@ yrs <- 1990:2019
 makedat <- function(irun, agelen.i, cwe.i, dir.i,
                     overwrite = FALSE, verbose = TRUE){
   # read dummy data file
-  datfile <- SS_readdat(file.path(mydir, 'CAPAM_platoons_template/platoon_data_template.ss'),
+  datfile <- SS_readdat(file.path(mydir, 'CAPAM_platoons_SS/CAPAM_platoons_template/platoon_data_template.ss'),
                         version = 3.30, verbose = FALSE)
 
   #### get catch and CPUE
@@ -51,11 +51,11 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
         months <- 7:12
         month <- 9
       }
-      catch.value <- sum(cwe.i$CAWT[cwe.i$YR == y & cwe.i$MONTH %in% months])
+      catch.value <- sum(cwe.i$CAWT[cwe.i$YR == y & cwe.i$MONTH %in% s])
       datfile$catch$catch[datfile$catch$year == y &
                           datfile$catch$seas == s] <- catch.value
 
-      effort.value <- sum(cwe.i$EFFORT[cwe.i$YR == y & cwe.i$MONTH %in% months])
+      effort.value <- sum(cwe.i$EFFORT[cwe.i$YR == y & cwe.i$MONTH %in% s])
       cpue.value <- catch.value / effort.value
       newrow.cpue <- data.frame(year = y,
                                 seas = month,
@@ -96,7 +96,7 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
         month <- 9
       }
       # subset rows of the IBM output
-      samps <- agelen.i[agelen.i$iyear == y & agelen.i$itspy %in% months,]
+      samps <- agelen.i[agelen.i$iyear == y & agelen.i$itspy %in% s,]
 
       if(verbose){
         print(nrow(samps))
@@ -182,19 +182,21 @@ build_models <- function(runs = 1:100, updatedat = FALSE, overwrite = TRUE){
   for(irun in runs){
 
     # copy all non-data files
-    newdir <- file.path(mydir, paste0('CAPAM_platoons_run', substring(1000 + irun, 2)))
+    newdir <- file.path(mydir,
+                        paste0('CAPAM_platoons_runs_Oct29/CAPAM_platoons_run',
+                               substring(1000 + irun, 2)))
     
     if(!dir.exists(newdir)){
       dir.create(newdir)
     }
     
-    file.copy(file.path(mydir, 'CAPAM_platoons_template/starter.ss'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_SS/CAPAM_platoons_template/starter.ss'),
               file.path(newdir, 'starter.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_template/forecast.ss'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_SS/CAPAM_platoons_template/forecast.ss'),
               file.path(newdir, 'forecast.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_template/platoons_control.ss'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_SS/CAPAM_platoons_template/platoons_control.ss'),
               file.path(newdir, 'platoons_control.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_template/ss.exe'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_SS/CAPAM_platoons_template/ss.exe'),
               file.path(newdir, 'ss.exe'), overwrite = overwrite)
 
     # update data file (not needed if change is only to control)
@@ -211,12 +213,52 @@ build_models <- function(runs = 1:100, updatedat = FALSE, overwrite = TRUE){
   }
 }
 
+remove_platoons <- function(dir){
+  # change starter file to point to different control file
+  start <- SS_readstarter(file.path(dir, 'starter.ss'))
+  start$ctlfile <- "no_platoons_control.ss"
+  SS_writestarter(start, dir = dir, overwrite = TRUE)
+  # change control file to convert these lines:
+  ## 5 #_N_platoons_Within_GrowthPattern
+  ## 1 #_Platoon_between/within_stdev_ratio (no read if N_platoons=1)
+  ## 0.031 0.237 0.464 0.237 0.031 #vector_platoon_dist_(-1_in_first_val_gives_normal_approx)
+  # into this line:
+  ## 1 #_N_platoons_Within_GrowthPattern
+  controlLines <- readLines(file.path(dir, 'platoons_control.ss'))
+  rows <- grep("N_platoons_Within_GrowthPattern", controlLines) + 0:2
+  controlLines[rows[1]] <- "1 #_N_platoons_Within_GrowthPattern"
+  controlLines <- controlLines[-rows[2:3]]
+  writeLines(controlLines, file.path(dir, 'no_platoons_control.ss'))
+}
+
+mydir.today <- 'c:/SS/McGarvey/CAPAM_platoons_runs_Oct29'
+mydir.today2 <- 'c:/SS/McGarvey/CAPAM_no_platoons_runs_Oct29'
 
 if(FALSE){
-  source('c:/ss/McGarvey/CAPAM_platoons_notes.R')
-  # build_models()
+  source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
+  build_models(run = 1:20, updatedat = TRUE)
+  p1 <- SS_output('c:/SS/McGarvey//CAPAM_platoons_runs_Oct29/CAPAM_platoons_run001')
+  SS_plots(p1)
   runs <- 1:100
-  dirs <- file.path(mydir, paste0('CAPAM_platoons_run', substring(1000 + runs, 2)))
-  #SSutils::run_SS_models(dirvec = dirs[51:100], systemcmd = TRUE, skipfinished = FALSE)
-  SSutils::run_SS_models(dirvec = dirs[1:50], systemcmd = TRUE, skipfinished = FALSE)
+  dirs <- file.path(mydir.today,
+                    paste0('CAPAM_platoons_run',
+                           substring(1000 + runs, 2)))
+  SSutils::populate_multiple_folders(outerdir.old = mydir.today,
+                                     outerdir.new = mydir.today2,
+                                     create.dir = TRUE, 
+                                     overwrite = FALSE,
+                                     use_ss_new = FALSE,
+                                     exe.dir = 'C:/ss/SSv3.30.14.05_Sept5',
+                                     exe.file = "ss.exe", 
+                                     exe.only = FALSE,
+                                     verbose = TRUE)
+  dirs2 <- dir(mydir.today2, full.names = TRUE)
+  for(idir in dirs2){
+    remove_platoons(idir)
+  }
+  source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
+  SSutils::run_SS_models(dirvec = dir(mydir.today[1:20], full.names = TRUE),
+                                      systemcmd = TRUE, skipfinished = FALSE)
+  SSutils::run_SS_models(dirvec = dir(mydir.today2[1:20], full.names = TRUE),
+                                      systemcmd = TRUE, skipfinished = FALSE)
 }
