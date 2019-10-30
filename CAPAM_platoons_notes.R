@@ -238,6 +238,7 @@ if(FALSE){
 
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
   build_models(run = 1:20, updatedat = TRUE)
+  build_models(run = 21:100, updatedat = TRUE)
   p1 <- SS_output('c:/SS/McGarvey//CAPAM_platoons_runs_Oct29/CAPAM_platoons_run001')
   SS_plots(p1)
   runs <- 1:100
@@ -259,10 +260,12 @@ if(FALSE){
   }
 
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
-  SSutils::run_SS_models(dirvec = dir(mydir.today[1:20], full.names = TRUE),
+  SSutils::run_SS_models(dirvec = dir(mydir.today[21:100], full.names = TRUE),
                          systemcmd = TRUE, skipfinished = FALSE,
+                         extras = "-nox -nohess",
                          intern = TRUE)
-  source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
-  SSutils::run_SS_models(dirvec = dir(mydir.today2[1:20], full.names = TRUE),
-                                      systemcmd = TRUE, skipfinished = FALSE)
+  SSutils::run_SS_models(dirvec = dir(mydir.today2[21:100], full.names = TRUE),
+                         systemcmd = TRUE, skipfinished = FALSE,
+                         extras = "-nox -nohess",
+                         intern = TRUE)
 }
