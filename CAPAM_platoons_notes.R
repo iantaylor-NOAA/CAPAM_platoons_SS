@@ -260,12 +260,13 @@ if(FALSE){
   }
 
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
-  SSutils::run_SS_models(dirvec = dir(mydir.today[21:100], full.names = TRUE),
+  SSutils::run_SS_models(dirvec = dir(mydir.today, full.names = TRUE)[21:100],
                          systemcmd = TRUE, skipfinished = FALSE,
-                         extras = "-nox -nohess",
+                         extras = "-nox",
                          intern = TRUE)
-  SSutils::run_SS_models(dirvec = dir(mydir.today2[21:100], full.names = TRUE),
+  source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
+  SSutils::run_SS_models(dirvec = dir(mydir.today2, full.names = TRUE)[21:100],
                          systemcmd = TRUE, skipfinished = FALSE,
-                         extras = "-nox -nohess",
+                         extras = "-nox",
                          intern = TRUE)
 }
