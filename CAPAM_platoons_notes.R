@@ -224,7 +224,51 @@ remove_platoons <- function(dir){
 mydir.today <- 'c:/SS/McGarvey/CAPAM_platoons_runs_Oct29'
 mydir.today2 <- 'c:/SS/McGarvey/CAPAM_no_platoons_runs_Oct29'
 
+
+get_par <- function(pars, string, N = 100){
+  # function to get a single row from the pars table in the list
+  # returned by SSsummarize
+  return(as.numeric(pars[pars$Label == string, 1:N]))
+}
+format_params <- function(modsum){
+  pars <- modsum$pars
+  L50 <- get_par(pars, "Size_inflection_fishery(1)")
+  L50to95 <- get_par(pars, "Size_95%width_fishery(1)")
+  logR0 <- get_par(pars, "SR_LN(R0)")
+  ## pars.out <- data.frame(K = get_par(pars, "VonBert_K_Fem_GP_1"),
+  ##                        Linf = 10*get_par(pars, "L_at_Amax_Fem_GP_1"),
+  ##                        L50_mm = 10*L50
+  ##                        L95_mm = 10*(L50 + L50to95),
+  ##                        qEt0_com_SSG_1 = NA,
+  ##                        sigm = NA,
+  ##                        sigexp = NA,
+  ##                        F0 = NA,
+  ##                        R0_thousands = exp(logR0),
+  ##                        sigCl1tHL = NA,
+  ##                        sigCw1Et1 = NA)
+  pars.out <- data.frame(K = get_par(pars, "VonBert_K_Fem_GP_1"),
+                         Linf_mm = 10*get_par(pars, "L_at_Amax_Fem_GP_1"),
+                         L50_mm = 10*L50,
+                         L95_mm = 10*(L50 + L50to95),
+                         R0_thousands = exp(logR0))
+  return(pars.out)
+}
+
+## K	0.196749
+## Linf	742.472
+## l5095HL0	42.3705
+## l95HL0	437.979
+## qEt0_com_SSG_1	5.14052
+## sigm	0.0857169
+## sigexp	1
+## F0	0.388752
+## R0initial	11488
+## sigCl1tHL	14.0537
+## sigCw1Et1	1220.53
+
 if(FALSE){
+  #### commands outside of a function
+  
 
   # read files from Richard McGarvey
   agelen <- read.table(file.path(mydir, 'Oct29_files/AGE-LENGTH41.OUT'),
@@ -259,6 +303,7 @@ if(FALSE){
     remove_platoons(idir)
   }
 
+  # run the models
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
   SSutils::run_SS_models(dirvec = dir(mydir.today, full.names = TRUE)[21:100],
                          systemcmd = TRUE, skipfinished = FALSE,
@@ -269,4 +314,56 @@ if(FALSE){
                          systemcmd = TRUE, skipfinished = FALSE,
                          extras = "-nox",
                          intern = TRUE)
+
+  # get the output and summarize it (1 is with platoons, 2 is without)
+  modlist1 <- SSgetoutput(dirvec = dir(mydir.today, full.names = TRUE))
+  modsum1 <- SSsummarize(modlist1)
+  modlist2 <- SSgetoutput(dirvec = dir(mydir.today2, full.names = TRUE))
+  modsum2 <- SSsummarize(modlist2)
+
+  # format the output
+  partable1 <- format_params(modsum1)
+  partable2 <- format_params(modsum2)
+
+  SSsummary_platoons <- modsum1
+  SSsummary_NOplatoons <- modsum2
+  save(SSsummary_platoons, SSsummary_NOplatoons,
+       file = file.path(file.path(mydir, 'SSsummaries_31Oct.Rdata')))
+
+  # write to files
+  write.csv(partable1, file = file.path(mydir, "SS_parameters_with_platoons_30-Oct.csv"), row.names = FALSE)
+  write.csv(partable2, file = file.path(mydir, "SS_parameters_NO_platoons_30-Oct.csv"), row.names = FALSE)
+
+  # p1 <- SS_output('C:/SS/McGarvey/CAPAM_platoons_runs_Oct29/CAPAM_platoons_run001')
+  p1 <- modlist1[[1]]
+  p1dat <- SS_readdat(file.path(p1$inputs$dir, p1$Data_File))
+
+  # illustrating platoons
+  #colvec <- rich.colors.short(6, alpha = 0.4)[-1]
+  png(file.path(mydir, "platoons_run001_length_distribution.png"),
+                width = 6.5, height = 5, res = 300, units ='in')
+  colvec <- rainbow(5, alpha = 1.0)
+  #colvec <- rich.colors.short(4, alpha = 0.6)[c(4,2,1,2,4)]
+  plot(0, type = 'n', xlim = c(1,15), ylim = c(4, 100), xaxs = 'i', yaxs = 'i',
+       xlab = "Age (years)", ylab = "Length (mm)", axes = FALSE)
+  axis(1)
+  axis(2, at = seq(0,120,10), labels = 10*seq(0,120,10), las = 1)
+  for(i in c(3,2,4,1,5)){
+    SSplotAgeMatrix(p1, slices = i, add = TRUE,
+                    col.bars = colvec[i],
+                    shift_lo = 2 * (i - 1) / 5,
+                    shift_hi = -2 * (5 - i) / 5,
+                    scale = 15*c(0.031, 0.237, 0.464, 0.237, 0.031)[i])
+  }
+  ybins <- seq(0, 120, 2)
+  accuage <- p1$accuage
+  col.grid = 'grey90'
+  abline(h=ybins, v=0:accuage, col=col.grid, lwd=0.5)
+  box()
+  dev.off()
+  
+  median(partable1$Linf_mm)
+  median(partable2$Linf_mm)
 }
+
+
