@@ -316,7 +316,20 @@ if(FALSE){
                          intern = TRUE)
 
   # get the output and summarize it (1 is with platoons, 2 is without)
+  time1 <- Sys.time()
   modlist1 <- SSgetoutput(dirvec = dir(mydir.today, full.names = TRUE))
+  time2 <- Sys.time()
+  time2 - time1
+  # Time difference of 2.390267 mins
+  if(FALSE){
+    rm(modlist1)
+    remotes::install_github('r4ss/r4ss', ref = 'type.convert')
+    time3 <- Sys.time()
+    modlist1 <- SSgetoutput(dirvec = dir(mydir.today, full.names = TRUE))
+    time4 <- Sys.time()
+    time4 - time3
+    #Time difference of 2.339042 mins
+  }
   modsum1 <- SSsummarize(modlist1)
   modlist2 <- SSgetoutput(dirvec = dir(mydir.today2, full.names = TRUE))
   modsum2 <- SSsummarize(modlist2)
