@@ -1,4 +1,5 @@
-mydir <- 'c:/SS/McGarvey/'
+mydir <- 'c:/SS/McGarvey/CAPAM_platoons_SS'
+mydir.dat <- file.path(mydir, 'IBM_data_9June2020')
 require(r4ss) # required for SS_readdat and SS_writedat
 #require(SSutils)
 
@@ -22,8 +23,11 @@ yrs <- 1990:2019
 makedat <- function(irun, agelen.i, cwe.i, dir.i,
                     overwrite = FALSE, verbose = TRUE){
   # read dummy data file
-  datfile <- SS_readdat(file.path(mydir, 'CAPAM_platoons_SS/CAPAM_platoons_template/platoon_data_template.ss'),
-                        version = 3.30, verbose = FALSE)
+  datfile <- SS_readdat(file.path(mydir,
+                                  'CAPAM_platoons_template',
+                                  'platoon_data_template.ss'),
+                        version = 3.30,
+                        verbose = FALSE)
 
   #### get catch and CPUE
   datfile$CPUE <- datfile$CPUE[NULL,]
@@ -168,25 +172,28 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
 
 ##### run stuff
 
-build_models <- function(runs = 1:100, updatedat = FALSE, overwrite = TRUE){
+build_models <- function(runs = 1:100,
+                         updatedat = FALSE,
+                         overwrite = TRUE,
+                         dir){
   for(irun in runs){
 
     # copy all non-data files
-    newdir <- file.path(mydir,
-                        paste0('CAPAM_platoons_runs_Oct29/CAPAM_platoons_run',
+    newdir <- file.path(dir,
+                        paste0('CAPAM_platoons_run',
                                substring(1000 + irun, 2)))
     
     if(!dir.exists(newdir)){
       dir.create(newdir)
     }
     
-    file.copy(file.path(mydir, 'CAPAM_platoons_SS/CAPAM_platoons_template/starter.ss'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_template/starter.ss'),
               file.path(newdir, 'starter.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_SS/CAPAM_platoons_template/forecast.ss'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_template/forecast.ss'),
               file.path(newdir, 'forecast.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_SS/CAPAM_platoons_template/platoons_control.ss'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_template/platoons_control.ss'),
               file.path(newdir, 'platoons_control.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_SS/CAPAM_platoons_template/ss.exe'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_template/ss.exe'),
               file.path(newdir, 'ss.exe'), overwrite = overwrite)
 
     # update data file (not needed if change is only to control)
@@ -221,15 +228,15 @@ remove_platoons <- function(dir){
   writeLines(controlLines, file.path(dir, 'no_platoons_control.ss'))
 }
 
-mydir.today <- 'c:/SS/McGarvey/CAPAM_platoons_runs_Oct29'
-mydir.today2 <- 'c:/SS/McGarvey/CAPAM_no_platoons_runs_Oct29'
-
-
-get_par <- function(pars, string, N = 100){
+get_par <- function(pars, string, N = NULL){
   # function to get a single row from the pars table in the list
   # returned by SSsummarize
+  if(is.null(N)){
+    N <- ncol(pars) - 3
+  }
   return(as.numeric(pars[pars$Label == string, 1:N]))
 }
+
 format_params <- function(modsum){
   pars <- modsum$pars
   L50 <- get_par(pars, "Size_inflection_fishery(1)")
@@ -248,6 +255,7 @@ format_params <- function(modsum){
   ##                        sigCw1Et1 = NA)
   pars.out <- data.frame(K = get_par(pars, "VonBert_K_Fem_GP_1"),
                          Linf_mm = 10*get_par(pars, "L_at_Amax_Fem_GP_1"),
+                         CV_old = get_par(pars, "CV_old_Fem_GP_1"),
                          L50_mm = 10*L50,
                          L95_mm = 10*(L50 + L50to95),
                          R0_thousands = exp(logR0))
@@ -269,32 +277,48 @@ format_params <- function(modsum){
 if(FALSE){
   #### commands outside of a function
   
-
   # read files from Richard McGarvey
-  agelen <- read.table(file.path(mydir, 'Oct29_files/AGE-LENGTH41.OUT'),
+  agelen <- read.table(file.path(mydir.dat, 'AGE-LENGTH41.OUT'),
                        skip = 2, header = TRUE)
-  cwe <- read.table(file.path(mydir, 'Oct29_files/CwEByMonth.OUT'),
+  cwe <- read.table(file.path(mydir.dat, 'CwEByMonth.OUT'),
                     skip = 1, header = TRUE)
 
   # subset to simulation 1 only
   agelen1 <- agelen[agelen$irun == 1,]
   cwe1 <- cwe[cwe$RUN == 1,]
 
+  # source this function
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
-  build_models(run = 1:20, updatedat = TRUE)
-  build_models(run = 21:100, updatedat = TRUE)
-  p1 <- SS_output('c:/SS/McGarvey//CAPAM_platoons_runs_Oct29/CAPAM_platoons_run001')
-  SS_plots(p1)
-  runs <- 1:100
-  dirs <- file.path(mydir.today,
-                    paste0('CAPAM_platoons_run',
-                           substring(1000 + runs, 2)))
-  SSutils::populate_multiple_folders(outerdir.old = mydir.today,
+  mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_22June')
+  mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_22June')
+  dir.create(mydir.today1)
+  dir.create(mydir.today2)
+  build_models(run = 1:20, updatedat = TRUE, dir = mydir.today1)
+  build_models(run = 21:100, updatedat = TRUE, dir = mydir.today1)
+  ## p1 <- SS_output('c:/SS/McGarvey//CAPAM_platoons_runs_22June/CAPAM_platoons_run001')
+  ## SS_plots(p1)
+
+  # populate paltoons directories with executable
+  SSutils::populate_multiple_folders(outerdir.old = mydir.today1,
+                                     outerdir.new = mydir.today1,
+                                     create.dir = FALSE, 
+                                     overwrite = FALSE,
+                                     use_ss_new = FALSE,
+                                     exe.dir = 'C:/ss/SSv3.30.15.06beta_custom_reporting',
+                                     exe.file = "ss.exe", 
+                                     exe.only = TRUE,
+                                     verbose = TRUE)
+
+  runs <- 1:20
+  dirs1 <- file.path(mydir.today1,
+                     paste0('CAPAM_platoons_run',
+                            substring(1000 + runs, 2)))
+  SSutils::populate_multiple_folders(outerdir.old = mydir.today1,
                                      outerdir.new = mydir.today2,
                                      create.dir = TRUE, 
                                      overwrite = FALSE,
                                      use_ss_new = FALSE,
-                                     exe.dir = 'C:/ss/SSv3.30.14.05_Sept5',
+                                     exe.dir = 'C:/ss/SSv3.30.15.06beta_custom_reporting',
                                      exe.file = "ss.exe", 
                                      exe.only = FALSE,
                                      verbose = TRUE)
@@ -305,31 +329,18 @@ if(FALSE){
 
   # run the models
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
-  SSutils::run_SS_models(dirvec = dir(mydir.today, full.names = TRUE)[21:100],
+  SSutils::run_SS_models(dirvec = dir(mydir.today1, full.names = TRUE)[1:20],
                          systemcmd = TRUE, skipfinished = FALSE,
                          extras = "-nox",
                          intern = TRUE)
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
-  SSutils::run_SS_models(dirvec = dir(mydir.today2, full.names = TRUE)[21:100],
+  SSutils::run_SS_models(dirvec = dir(mydir.today2, full.names = TRUE)[1:20],
                          systemcmd = TRUE, skipfinished = FALSE,
                          extras = "-nox",
                          intern = TRUE)
 
   # get the output and summarize it (1 is with platoons, 2 is without)
-  time1 <- Sys.time()
-  modlist1 <- SSgetoutput(dirvec = dir(mydir.today, full.names = TRUE))
-  time2 <- Sys.time()
-  time2 - time1
-  # Time difference of 2.390267 mins
-  if(FALSE){
-    rm(modlist1)
-    remotes::install_github('r4ss/r4ss', ref = 'type.convert')
-    time3 <- Sys.time()
-    modlist1 <- SSgetoutput(dirvec = dir(mydir.today, full.names = TRUE))
-    time4 <- Sys.time()
-    time4 - time3
-    #Time difference of 2.339042 mins
-  }
+  modlist1 <- SSgetoutput(dirvec = dir(mydir.today1, full.names = TRUE))
   modsum1 <- SSsummarize(modlist1)
   modlist2 <- SSgetoutput(dirvec = dir(mydir.today2, full.names = TRUE))
   modsum2 <- SSsummarize(modlist2)
@@ -341,15 +352,16 @@ if(FALSE){
   SSsummary_platoons <- modsum1
   SSsummary_NOplatoons <- modsum2
   save(SSsummary_platoons, SSsummary_NOplatoons,
-       file = file.path(file.path(mydir, 'SSsummaries_31Oct.Rdata')))
+       file = file.path(file.path(mydir, 'SSsummaries_2July2020.Rdata')))
 
   # write to files
-  write.csv(partable1, file = file.path(mydir, "SS_parameters_with_platoons_30-Oct.csv"), row.names = FALSE)
-  write.csv(partable2, file = file.path(mydir, "SS_parameters_NO_platoons_30-Oct.csv"), row.names = FALSE)
+  write.csv(partable1, file = file.path(mydir, "SS_parameters_with_platoons_2July2020.csv"), row.names = FALSE)
+  write.csv(partable2, file = file.path(mydir, "SS_parameters_NO_platoons_2July2020.csv"), row.names = FALSE)
 
-  # p1 <- SS_output('C:/SS/McGarvey/CAPAM_platoons_runs_Oct29/CAPAM_platoons_run001')
-  p1 <- modlist1[[1]]
-  p1dat <- SS_readdat(file.path(p1$inputs$dir, p1$Data_File))
+  # p1a <- SS_output('C:/SS/McGarvey/CAPAM_platoons_runs_Oct29/CAPAM_platoons_run001')
+  p1a <- modlist1[[1]]
+  p1adat <- SS_readdat(file.path(p1a$inputs$dir, p1a$Data_File))
+  p1b <- modlist2[[1]]
 
   # illustrating platoons
   #colvec <- rich.colors.short(6, alpha = 0.4)[-1]
@@ -362,21 +374,29 @@ if(FALSE){
   axis(1)
   axis(2, at = seq(0,120,10), labels = 10*seq(0,120,10), las = 1)
   for(i in c(3,2,4,1,5)){
-    SSplotAgeMatrix(p1, slices = i, add = TRUE,
+    SSplotAgeMatrix(p1a, slices = i, add = TRUE,
                     col.bars = colvec[i],
                     shift_lo = 2 * (i - 1) / 5,
                     shift_hi = -2 * (5 - i) / 5,
                     scale = 15*c(0.031, 0.237, 0.464, 0.237, 0.031)[i])
   }
   ybins <- seq(0, 120, 2)
-  accuage <- p1$accuage
+  accuage <- p1a$accuage
   col.grid = 'grey90'
   abline(h=ybins, v=0:accuage, col=col.grid, lwd=0.5)
   box()
   dev.off()
   
   median(partable1$Linf_mm)
+  ## [1] 1053.025
   median(partable2$Linf_mm)
+  ## [1] 1073.17
+
+  median(partable1$CV_old)
+  ## [1] 1053.025
+  median(partable2$CV_old)
+
+
 }
 
 

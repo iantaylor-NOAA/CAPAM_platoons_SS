@@ -37,3 +37,12 @@ vignettes/*.pdf
 
 # executable files
 *.exe
+
+# model runs
+runs*
+
+# Rdata files
+*.Rdata
+
+# Word docs
+*.docx

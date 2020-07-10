@@ -57,23 +57,23 @@
 #_growth_parms
 #_LO    HI      INIT    PRIOR   PR_SD   PR_type PHASE   envvar  dev_lnk dv_mnyr dv_mxyr dev_PH  Block   Block_Fxn
 #       Sex:    1       BioPattern:     1       NatMort
-0.01    0.4     0.05    0.05    0.8     0       -3       0       0       0       0       0       0       0       #       NatM_p_1_Fem_GP_1
+0.01    0.4     0.05    0.05    99      0       -3       0       0       0       0       0       0       0       #       NatM_p_1_Fem_GP_1
 #       Sex:    1       BioPattern:     1       Growth
-5       40      20      20      10      0       2       0       0       0       0       0       0       0       #       L_at_Amin_Fem_GP_1
-50      150     70      70      10      0       2       0       0       0       0       0       0       0       #       L_at_Amax_Fem_GP_1
-0.01    0.4     0.2     0.15    0.8     0       3       0       0       0       0       0       0       0       #       VonBert_K_Fem_GP_1
-0.05    0.3     0.1     0.1     0.8     0       3       0       0       0       0       0       0       0       #       CV_young_Fem_GP_1
-0.05    0.3     0.25    0.25    0.8     0       3       0       0       0       0       0       0       0       #       CV_old_Fem_GP_1
+5       40      20      20      99      0       2       0       0       0       0       0       0       0       #       L_at_Amin_Fem_GP_1
+50      150     100     100     99      0       2       0       0       0       0       0       0       0       #       L_at_Amax_Fem_GP_1
+0.01    0.4     0.1     0.1     99      0       3       0       0       0       0       0       0       0       #       VonBert_K_Fem_GP_1
+0.05    0.3     0.1     0.1     99      0       3       0       0       0       0       0       0       0       #       CV_young_Fem_GP_1
+0.05    0.3     0.25    0.25    99      0       3       0       0       0       0       0       0       0       #       CV_old_Fem_GP_1
 #       Sex:    1       BioPattern:     1       WtLen
--3      3   2.1733e-5 2.1733e-5 0.8     0       -3      0       0       0       0       0       0       0       #       Wtlen_1_Fem_GP_1
--3      4       2.86    2.86    0.8     0       -3      0       0       0       0       0       0       0       #       Wtlen_2_Fem_GP_1
+-3      3   2.1733e-5 2.1733e-5 99      0       -3      0       0       0       0       0       0       0       #       Wtlen_1_Fem_GP_1
+-3      4       2.86    2.86    99      0       -3      0       0       0       0       0       0       0       #       Wtlen_2_Fem_GP_1
 #       Sex:    1       BioPattern:     1       Maturity&Fecundity
-50      60      55      55      0.8     0       -3      0       0       0       0       0       0       0       #       Mat50%_Fem_GP_1
--3      3       -0.25   -0.25   0.8     0       -3      0       0       0       0       0       0       0       #       Mat_slope_Fem_GP_1
--3      3       1       1       0.8     0       -3      0       0       0       0       0       0       0       #       Eggs/kg_inter_Fem_GP_1
--3      3       0       0       0.8     0       -3      0       0       0       0       0       0       0       #       Eggs/kg_slope_wt_Fem_GP_1
+50      60      55      55      99      0       -3      0       0       0       0       0       0       0       #       Mat50%_Fem_GP_1
+-3      3       -0.25   -0.25   99      0       -3      0       0       0       0       0       0       0       #       Mat_slope_Fem_GP_1
+-3      3       1       1       99      0       -3      0       0       0       0       0       0       0       #       Eggs/kg_inter_Fem_GP_1
+-3      3       0       0       99      0       -3      0       0       0       0       0       0       0       #       Eggs/kg_slope_wt_Fem_GP_1
 #       Cohort  growth  dev     base
-0.1     10      1       1       1       0       -1      0       0       0       0       0       0       0       #       CohortGrowDev
+0.1     10      1       1       99      0       -1      0       0       0       0       0       0       0       #       CohortGrowDev
 #  Movement
 #  Age Error from parameters
 #  catch multiplier
@@ -204,8 +204,8 @@
 #
 #_          LO            HI          INIT         PRIOR         PR_SD       PR_type      PHASE    env-var    use_dev   dev_mnyr   dev_mxyr     dev_PH      Block    Blk_Fxn  #  parm_name
 # 1   fishery LenSelex
-            20            60          45            45          0.01             0          2          0          0          0          0          0          0          0  #  Size_inflection_FISHERY(1)
-          0.01            10          3             3           0.01             0          3          0          0          0          0          0          0          0  #  Size_95%width_FISHERY(1)
+            20            60          40            40          0.01             0          2          0          0          0          0          0          0          0  #  Size_inflection_FISHERY(1)
+          0.01            10          1             1           0.01             0          3          0          0          0          0          0          0          0  #  Size_95%width_FISHERY(1)
 # 1   fishery AgeSelex
 #_no timevary selex parameters
 #
@@ -237,7 +237,7 @@
 # 10=recrdev; 11=parm_prior; 12=parm_dev; 13=CrashPen; 14=Morphcomp; 15=Tag-comp; 16=Tag-negbin; 17=F_ballpark
 #like_comp fleet  phase  value  sizefreq_method
 7          1      1      0      99 # turn off likelihood for mean length at age
-9          1      1      0      99 # turn off likelihood for mean length at age
+9          1      1      0      99 # turn off likelihood for initial equilibrium catch
 -9999      1      1      1      1  #  terminator
 
 #

@@ -1,20 +1,23 @@
-mydir <- 'c:/SS/McGarvey/'
-require(r4ss) # required for SS_readdat and SS_writedat
+#mydir <- 'c:/SS/McGarvey/'
+#require(r4ss) # required for SS_readdat and SS_writedat
 
 # read files from Richard McGarvey
+# see CAPAM_platoons_notes.R for where these get read
+
 if(FALSE){
-  agelen <- read.table(file.path(mydir, 'Oct29_files/AGE-LENGTH41.OUT'),
-                       skip = 2, header = TRUE)
-  cwe <- read.table(file.path(mydir, 'Oct29_files/CwEByMonth.OUT'),
-                    skip = 1, header = TRUE)
-  # subset to simulation 1 only
-  agelen1 <- agelen[agelen$irun == 1,]
-  cwe1 <- cwe[cwe$RUN == 1]
+  ## agelen <- read.table(file.path(mydir, 'Oct29_files/AGE-LENGTH41.OUT'),
+  ##                      skip = 2, header = TRUE)
+  ## cwe <- read.table(file.path(mydir, 'Oct29_files/CwEByMonth.OUT'),
+  ##                   skip = 1, header = TRUE)
+  ## # subset to simulation 1 only
+  ## agelen1 <- agelen[agelen$irun == 1,]
+  ## cwe1 <- cwe[cwe$RUN == 1]
 
-  p1 <- SS_output('c:/SS/McGarvey/CAPAM_platoons_runs_Oct29/CAPAM_platoons_run001')
-  p1b <- SS_output('c:/SS/McGarvey/CAPAM_no_platoons_runs_Oct29/CAPAM_platoons_run001')
+  ## p1 <- SS_output('c:/SS/McGarvey/CAPAM_platoons_runs_Oct29/CAPAM_platoons_run001')
+  ## p1b <- SS_output('c:/SS/McGarvey/CAPAM_no_platoons_runs_Oct29/CAPAM_platoons_run001')
 
-
+  p1a <- modlist1[[1]]
+  p1b <- modlist2[[1]]
 }
 
 
@@ -44,10 +47,11 @@ lines(growth$age, growth$q95, col=2, lwd=2, lty = 2)
 
 ## points(agelen$AGE, agelen$LEN, xlim = c(0, 20),
 ##        pch=16, col = gray(0, 0.01), ylim = c(20,90))
-SSplotBiology(p1, subplot = 1, add = TRUE, colvec = rep(rgb(0,1,0,.2), 3))
+
+SSplotBiology(p1a, subplot = 1, add = TRUE, colvec = rep(rgb(0,1,0,.2), 3))
 SSplotBiology(p1b, subplot = 1, add = TRUE, colvec = rep(rgb(1,0,0,.2), 3))
 
-points(p1$ladbase$Bin[p1$ladbase$Month == 3],
-       p1$ladbase$Exp[p1$ladbase$Month == 3], pch=16, col=4)
+points(p1a$ladbase$Bin[p1a$ladbase$Month == 3],
+       p1a$ladbase$Exp[p1a$ladbase$Month == 3], pch=16, col=4)
 points(p1b$ladbase$Bin[p1b$ladbase$Month == 3],
        p1b$ladbase$Exp[p1b$ladbase$Month == 3], pch=16, col=5)
