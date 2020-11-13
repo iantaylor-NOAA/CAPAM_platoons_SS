@@ -35,8 +35,8 @@
 #_Catch data: yr, seas, fleet, catch, catch_se
 #_catch_se:  standard error of log(catch)
 #_NOTE:  catch data is ignored for survey fleets
--999 1 1 5000 10.0 # equilibrium catch only in season 1 to avoid confounding
--999 2 1 0   0.01 # equilibrium placeholder for season 2 
+-999 1 1 1000 2.0 # equilibrium catch for season 1
+-999 2 1 1000 2.0 # equilibrium catch for season 2 
 1990 1 1 100 0.01
 1990 2 1 100 0.01
 1991 1 1 100 0.01
