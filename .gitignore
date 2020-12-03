@@ -40,6 +40,8 @@ vignettes/*.pdf
 
 # model runs
 runs*
+output
+IBM_data*
 
 # Rdata files
 *.Rdata
