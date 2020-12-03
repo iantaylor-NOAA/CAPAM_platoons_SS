@@ -64,14 +64,14 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
     } # end loop over seasons
   } # end loop over years
 
-  # use average catch for first 5 years as equilibrium value
-  # summing across seasons and dividing by 5 should get an annual value
-  for(s in 1:2){
-    catch.5yr.avg.s <- sum(datfile$catch$catch[datfile$catch$year %in% 1990:1994 &
-                                               datfile$catch$seas == s])/5
-    datfile$catch$catch[datfile$catch$year == -999 &
-                        datfile$catch$seas == s] <- catch.5yr.avg.s
-  }
+  ## # use average catch for first 5 years as equilibrium value
+  ## # summing across seasons and dividing by 5 should get an annual value
+  ## for(s in 1:2){
+  ##   catch.5yr.avg.s <- sum(datfile$catch$catch[datfile$catch$year %in% 1990:1994 &
+  ##                                              datfile$catch$seas == s])/5
+  ##   datfile$catch$catch[datfile$catch$year == -999 &
+  ##                       datfile$catch$seas == s] <- catch.5yr.avg.s
+  ## }
   
   #### get length and age comps
 
