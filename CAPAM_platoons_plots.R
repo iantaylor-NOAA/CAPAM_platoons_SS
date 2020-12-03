@@ -26,6 +26,7 @@ if(FALSE){
 
 # plotting mean length at age
 runs <- 1:10
+runs <- 1
 # subset data
 agelen.sub <- agelen[agelen$irun %in% runs, ]
 growth <- aggregate(agelen.sub$LEN, by = list(floor(agelen.sub$AGE)),
@@ -54,8 +55,10 @@ lines(growth$age, growth$q95, col=1, lwd=2, lty = 3)
 
 col.a <- rgb(0,0,1,.2)
 col.b <- rgb(1,0,0,.2)
+col.c <- rgb(0,1,0,.2)
 col.a2 <- rgb(0,0,1,.7)
 col.b2 <- rgb(1,0,0,.7)
+col.c2 <- rgb(0,1,0,.7)
 SSplotBiology(p1a, subplot = 1, add = TRUE, colvec = rep(col.a, 3))
 SSplotBiology(p1b, subplot = 1, add = TRUE, colvec = rep(col.b, 3))
 
@@ -63,5 +66,14 @@ points(p1a$ladbase$Bin[p1a$ladbase$Month == 3],
        p1a$ladbase$Exp[p1a$ladbase$Month == 3], pch=1, cex = 1.5, col=col.a2)
 points(p1b$ladbase$Bin[p1b$ladbase$Month == 3],
        p1b$ladbase$Exp[p1b$ladbase$Month == 3], pch=2, cex = 1.5, col=col.b2)
-legend('topleft',
-       pch = 16, col = gray
+## legend('topleft',
+##        pch = 16, col = gray
+
+
+## growth curves
+
+
+SSplotBiology(m2, subplot = 1, add = FALSE, colvec = rep(col.a, 3))
+SSplotBiology(m1, subplot = 1, add = TRUE, colvec = rep(col.b, 3))
+SSplotBiology(m3, subplot = 1, add = TRUE, colvec = rep(col.c, 3))
+legend('topleft', fill=c(col.a, col.b, col.c), legend=c('No platoons', 'Platoons with rho = 1.0', 'Platoons with rho = 0.7'))

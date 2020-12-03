@@ -2,8 +2,8 @@ mydir <- 'c:/SS/McGarvey/CAPAM_platoons_SS'
 #mydir.dat <- file.path(mydir, 'IBM_data_9June2020')
 #mydir.dat <- file.path(mydir, 'IBM_data_30July2020')
 mydir.dat <- file.path(mydir, 'IBM_data_22Oct2020')
-mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_29Oct')
-mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_29Oct')
+mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_13Nov')
+mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_13Nov')
 n <- 10
 accuage <- 24
 require(r4ss) # required for SS_readdat and SS_writedat
@@ -203,13 +203,13 @@ build_models <- function(runs = 1:100,
       dir.create(newdir)
     }
     
-    file.copy(file.path(mydir, 'CAPAM_platoons_template/starter.ss'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_template_22Oct2020/starter.ss'),
               file.path(newdir, 'starter.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_template/forecast.ss'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_template_22Oct2020/forecast.ss'),
               file.path(newdir, 'forecast.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_template/platoons_control.ss'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_template_22Oct2020/platoons_control.ss'),
               file.path(newdir, 'platoons_control.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_template/ss.exe'),
+    file.copy(file.path(mydir, 'CAPAM_platoons_template_22Oct2020/ss.exe'),
               file.path(newdir, 'ss.exe'), overwrite = overwrite)
 
     # update data file (not needed if change is only to control)
@@ -290,6 +290,25 @@ format_params <- function(modsum){
 ## sigCl1tHL	14.0537
 ## sigCw1Et1	1220.53
 
+get30plus <- function(mod, min = 30){
+  natlen <- mod$natlen
+  Yr <- seq(1990, 2019.5, by = 0.5)
+  bins <- p1$lbinspop[p1$lbinspop >= min]
+  # aggregate over platoons
+  natlen.mat <- matrix(0, nrow = 60, ncol = length(bins))
+  for(iplatoon in unique(natlen$Platoon)){
+    natlen.mat <- natlen.mat +
+      as.matrix(natlen[natlen$Platoon == iplatoon &
+                       natlen$Time %in% seq(1990, 2019.5, by = 0.5),
+                       paste(bins)])
+  }
+  # weight for 30+cm fish
+  wt30plus <- mod$biology$Wt_len[mod$biology$Low %in% bins]
+  N30plus <- apply(natlen.mat, MARGIN = 1, FUN = sum)
+  B30plus <- natlen.mat %*% wt30plus
+  data.frame(Yr, N30plus = N30plus, B30plus = B30plus)
+}
+
 if(FALSE){
   #### commands outside of a function
   
@@ -300,7 +319,7 @@ if(FALSE){
                     skip = 1, header = TRUE)
   true <- read.table(file.path(mydir.dat, 'True_IBM_Values.TRU'),
                      skip = 7, header = TRUE)
-  n <- 1
+  n <- 10
   
   # subset to simulation 1 only
   agelen1 <- agelen[agelen$irun == 1,]
@@ -336,7 +355,7 @@ if(FALSE){
                                   create.dir = TRUE, 
                                   overwrite = TRUE,
                                   use_ss_new = FALSE,
-                                  exe.dir = 'C:/ss/SSv3.30.15.09_July6',
+                                  exe.dir = 'C:/ss/SSv3.30.16.02_Sept24',
                                   exe.file = "ss.exe", 
                                   exe.only = FALSE,
                                   verbose = TRUE)
@@ -380,7 +399,7 @@ if(FALSE){
   SSsummary_platoons <- modsum1
   SSsummary_NOplatoons <- modsum2
   save(SSsummary_platoons, SSsummary_NOplatoons,
-       file = file.path(file.path(mydir, 'SSsummaries_29Oct2020.Rdata')))
+       file = file.path(file.path(mydir, 'SSsummaries_13Nov2020.Rdata')))
 
   # load stuff saved above
   if (FALSE) {
@@ -408,65 +427,46 @@ if(FALSE){
             file = file.path(mydir, "SS_exploitation_NO_platoons_14Aug2020.csv"),
             row.names = FALSE)
 
-  get40plus <- function(mod){
-    natlen <- mod$natlen
-    Yr <- seq(1990, 2019.5, by = 0.5)
-    bins <- seq(40,120,2)
-    # aggregate over platoons
-    natlen.mat <- matrix(0, nrow = 60, ncol = 41)
-    for(iplatoon in unique(natlen$Platoon)){
-      natlen.mat <- natlen.mat +
-        as.matrix(natlen[natlen$Platoon == iplatoon &
-                         natlen$Time %in% seq(1990, 2019.5, by = 0.5),
-                         paste(bins)])
-    }
-    # weight for 40+cm fish
-    wt40plus <- mod$biology$Wt_len_F[mod$biology$Low %in% bins]
-    N40plus <- apply(natlen.mat, MARGIN = 1, FUN = sum)
-    B40plus <- natlen.mat %*% wt40plus
-    data.frame(Yr, N40plus = N40plus, B40plus = B40plus)
-  }
-
   # summarize 40cm+ fish across models
-  modsum1$N40plus <- NULL
-  modsum1$B40plus <- NULL
-  modsum2$N40plus <- NULL
-  modsum2$B40plus <- NULL
+  modsum1$N30plus <- NULL
+  modsum1$B30plus <- NULL
+  modsum2$N30plus <- NULL
+  modsum2$B30plus <- NULL
   for (imod in 1:20) {
-    info40plus1 <- get40plus(modlist1[[imod]])
-    info40plus2 <- get40plus(modlist2[[imod]])
-    modsum1$N40plus <- cbind(modsum1$N40plus, info40plus1$N40plus)
-    modsum1$B40plus <- cbind(modsum1$B40plus, info40plus1$B40plus)
-    modsum2$N40plus <- cbind(modsum2$N40plus, info40plus2$N40plus)
-    modsum2$B40plus <- cbind(modsum2$B40plus, info40plus2$B40plus)
+    info30plus1 <- get30plus(modlist1[[imod]])
+    info30plus2 <- get30plus(modlist2[[imod]])
+    modsum1$N30plus <- cbind(modsum1$N30plus, info30plus1$N30plus)
+    modsum1$B30plus <- cbind(modsum1$B30plus, info30plus1$B30plus)
+    modsum2$N30plus <- cbind(modsum2$N30plus, info30plus2$N30plus)
+    modsum2$B30plus <- cbind(modsum2$B30plus, info30plus2$B30plus)
   }
   # convert to data.frame
-  modsum1$N40plus <- as.data.frame(modsum1$N40plus)
-  modsum1$B40plus <- as.data.frame(modsum1$B40plus)
-  modsum2$N40plus <- as.data.frame(modsum2$N40plus)
-  modsum2$B40plus <- as.data.frame(modsum2$B40plus)
+  modsum1$N30plus <- as.data.frame(modsum1$N30plus)
+  modsum1$B30plus <- as.data.frame(modsum1$B30plus)
+  modsum2$N30plus <- as.data.frame(modsum2$N30plus)
+  modsum2$B30plus <- as.data.frame(modsum2$B30plus)
   # rename columns
-  names(modsum1$N40plus) <- paste0("run", 1:20)
-  names(modsum1$B40plus) <- paste0("run", 1:20)
-  names(modsum2$N40plus) <- paste0("run", 1:20)
-  names(modsum2$B40plus) <- paste0("run", 1:20)
+  names(modsum1$N30plus) <- paste0("run", 1:20)
+  names(modsum1$B30plus) <- paste0("run", 1:20)
+  names(modsum2$N30plus) <- paste0("run", 1:20)
+  names(modsum2$B30plus) <- paste0("run", 1:20)
   # add year column at the end
-  modsum1$N40plus$Yr <- info40plus1$Yr
-  modsum1$B40plus$Yr <- info40plus1$Yr
-  modsum2$N40plus$Yr <- info40plus1$Yr
-  modsum2$B40plus$Yr <- info40plus1$Yr
+  modsum1$N30plus$Yr <- info30plus1$Yr
+  modsum1$B30plus$Yr <- info30plus1$Yr
+  modsum2$N30plus$Yr <- info30plus1$Yr
+  modsum2$B30plus$Yr <- info30plus1$Yr
 
-  write.csv(modsum1$N40plus,
-            file = file.path(mydir, "SS_numbers40plus_with_platoons_26Aug2020.csv"),
+  write.csv(modsum1$N30plus,
+            file = file.path(mydir, "SS_numbers30plus_with_platoons_26Aug2020.csv"),
             row.names = FALSE)
-  write.csv(modsum1$B40plus,
-            file = file.path(mydir, "SS_biomass40plus_with_platoons_26Aug2020.csv"),
+  write.csv(modsum1$B30plus,
+            file = file.path(mydir, "SS_biomass30plus_with_platoons_26Aug2020.csv"),
             row.names = FALSE)
-  write.csv(modsum2$N40plus,
-            file = file.path(mydir, "SS_numbers40plus_NO_platoons_26Aug2020.csv"),
+  write.csv(modsum2$N30plus,
+            file = file.path(mydir, "SS_numbers30plus_NO_platoons_26Aug2020.csv"),
             row.names = FALSE)
-  write.csv(modsum2$B40plus,
-            file = file.path(mydir, "SS_biomass40plus_NO_platoons_26Aug2020.csv"),
+  write.csv(modsum2$B30plus,
+            file = file.path(mydir, "SS_biomass30plus_NO_platoons_26Aug2020.csv"),
             row.names = FALSE)
   
   # p1a <- SS_output('C:/SS/McGarvey/CAPAM_platoons_runs_Oct29/CAPAM_platoons_run001')
@@ -546,32 +546,33 @@ if(FALSE){
   points(meanLinf2, meanK2, pch=16, cex = 2, col = 2)
   abline(v = 100, h = 0.1, lty=3)
 
-  # time series of B40+
-  startyr <- modsum1$B40plus$Yr %% 1 == 0
+  # time series of B30+
+  startyr <- modsum1$B30plus$Yr %% 1 == 0
   plot(x = true$iyear, y = true$StartYrBgtL50,
        col = rainbow(20, alpha = 0.3)[true$irun],
        ylim = c(0, 1.05*max(true$StartYrBgtL50)),
        yaxs = 'i')
-  matplot(modsum1$B40plus$Yr[startyr], modsum1$B40plus[startyr, 1:20],
+  n <- 1
+  matplot(modsum1$B30plus$Yr[startyr], modsum1$B30plus[startyr, 1:n],
           type = 'l',
           col = rgb(1, 0, 0, 0.2),
           add = TRUE)
-  matplot(modsum2$B40plus$Yr[startyr], modsum2$B40plus[startyr, 1:20],
+  matplot(modsum2$B30plus$Yr[startyr], modsum2$B30plus[startyr, 1:n],
           type = 'l',
           col = rgb(0, 0, 1, 0.2),
           add = TRUE)
 
-  # time series of N40+
-  startyr <- modsum1$N40plus$Yr %% 1 == 0
+  # time series of N30+
+  startyr <- modsum1$N30plus$Yr %% 1 == 0
   plot(x = true$iyear, y = true$StartYrNgtL50,
        col = rainbow(20, alpha = 0.3)[true$irun],
        ylim = c(0, 1.05*max(true$StartYrNgtL50)),
        yaxs = 'i')
-  matplot(modsum1$N40plus$Yr[startyr], modsum1$N40plus[startyr, 1:20],
+  matplot(modsum1$N30plus$Yr[startyr], modsum1$N30plus[startyr, 1:20],
           type = 'l',
           col = rgb(1, 0, 0, 0.2),
           add = TRUE)
-  matplot(modsum2$N40plus$Yr[startyr], modsum2$N40plus[startyr, 1:20],
+  matplot(modsum2$N30plus$Yr[startyr], modsum2$N30plus[startyr, 1:20],
           type = 'l',
           col = rgb(0, 0, 1, 0.2),
           add = TRUE)
@@ -609,3 +610,8 @@ if(FALSE){
 # pure exploitation rate?
 # population numbers
 
+
+m1 <- SS_output('C:/SS/McGarvey/CAPAM_platoons_SS/IBM_data_22Oct2020/runs_with_platoons_13Nov/CAPAM_platoons_run001')
+m2 <- SS_output('C:/SS/McGarvey/CAPAM_platoons_SS/IBM_data_22Oct2020/runs_no_platoons_13Nov/CAPAM_platoons_run001')
+m3 <- SS_output('C:/SS/McGarvey/CAPAM_platoons_SS/IBM_data_22Oct2020/CAPAM_platoons_run001_ratio0.7')
+SSplotComparisons(SSsummarize(list(m1,m2,m3)))
