@@ -1,10 +1,8 @@
 mydir <- 'c:/SS/McGarvey/CAPAM_platoons_SS'
-#mydir.dat <- file.path(mydir, 'IBM_data_9June2020')
-#mydir.dat <- file.path(mydir, 'IBM_data_30July2020')
-mydir.dat <- file.path(mydir, 'IBM_data_22Oct2020')
-mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_13Nov')
-mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_13Nov')
-n <- 10
+mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020')
+mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_3Dec')
+mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_3Dec')
+n <- 1
 accuage <- 24
 require(r4ss) # required for SS_readdat and SS_writedat
 #require(SSutils)
