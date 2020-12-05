@@ -1,8 +1,4 @@
 mydir <- 'c:/SS/McGarvey/CAPAM_platoons_SS'
-mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020')
-mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_3Dec')
-mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_3Dec')
-n <- 1
 accuage <- 24
 require(r4ss) # required for SS_readdat and SS_writedat
 #require(SSutils)
@@ -25,10 +21,12 @@ yrs <- 1990:2019
 
 
 makedat <- function(irun, agelen.i, cwe.i, dir.i,
-                    overwrite = FALSE, verbose = TRUE){
+                    dir.template,
+                    init_catch = FALSE,
+                    overwrite = FALSE,
+                    verbose = TRUE){
   # read dummy data file
-  datfile <- SS_readdat(file.path(mydir,
-                                  'CAPAM_platoons_template_22Oct2020',
+  datfile <- SS_readdat(file.path(dir.template,
                                   'platoon_data_template.ss'),
                         version = 3.30,
                         verbose = FALSE)
@@ -64,14 +62,16 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
     } # end loop over seasons
   } # end loop over years
 
-  ## # use average catch for first 5 years as equilibrium value
-  ## # summing across seasons and dividing by 5 should get an annual value
-  ## for(s in 1:2){
-  ##   catch.5yr.avg.s <- sum(datfile$catch$catch[datfile$catch$year %in% 1990:1994 &
-  ##                                              datfile$catch$seas == s])/5
-  ##   datfile$catch$catch[datfile$catch$year == -999 &
-  ##                       datfile$catch$seas == s] <- catch.5yr.avg.s
-  ## }
+  # use average catch for first 5 years as equilibrium value
+  # summing across seasons and dividing by 5 should get an annual value
+  if(init_catch){
+    for(s in 1:2){
+      catch.5yr.avg.s <- sum(datfile$catch$catch[datfile$catch$year %in% 1990:1994 &
+                                                 datfile$catch$seas == s])/5
+      datfile$catch$catch[datfile$catch$year == -999 &
+                          datfile$catch$seas == s] <- catch.5yr.avg.s
+    }
+  }
   
   #### get length and age comps
 
@@ -187,6 +187,7 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
 ##### run stuff
 
 build_models <- function(runs = 1:100,
+                         dir.template,
                          updatedat = FALSE,
                          overwrite = TRUE,
                          dir){
@@ -201,13 +202,13 @@ build_models <- function(runs = 1:100,
       dir.create(newdir)
     }
     
-    file.copy(file.path(mydir, 'CAPAM_platoons_template_22Oct2020/starter.ss'),
+    file.copy(file.path(dir.template, 'starter.ss'),
               file.path(newdir, 'starter.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_template_22Oct2020/forecast.ss'),
+    file.copy(file.path(dir.template, 'forecast.ss'),
               file.path(newdir, 'forecast.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_template_22Oct2020/platoons_control.ss'),
+    file.copy(file.path(dir.template, 'platoons_control.ss'),
               file.path(newdir, 'platoons_control.ss'), overwrite = overwrite)
-    file.copy(file.path(mydir, 'CAPAM_platoons_template_22Oct2020/ss.exe'),
+    file.copy(file.path(dir.template, 'ss.exe'),
               file.path(newdir, 'ss.exe'), overwrite = overwrite)
 
     # update data file (not needed if change is only to control)
@@ -218,6 +219,7 @@ build_models <- function(runs = 1:100,
               agelen.i  = agelen.i,
               cwe.i     = cwe.i,
               dir.i     = newdir,
+              dir.template = dir.template,
               overwrite = overwrite,
               verbose = FALSE)
     }
@@ -309,6 +311,18 @@ get30plus <- function(mod, min = 30){
 
 if(FALSE){
   #### commands outside of a function
+
+  mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
+                         'Baseline_KnifeEdge40cm_Fp4_Mp05/IBMData')
+  mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
+                         'OneWayTrip_FRising10YrsFr0top25_Mp15/IBMData')
+  
+  mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_3Dec')
+  mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_3Dec')
+  dir.template1 <- file.path(mydir, 'CAPAM_platoons_template_current')
+  dir.template2 <- file.path(mydir, 'CAPAM_platoons_template_initF')
+  n <- 1
+
   
   # read files from Richard McGarvey
   agelen <- read.table(file.path(mydir.dat, 'AGE-LENGTH41.OUT'),
@@ -327,21 +341,23 @@ if(FALSE){
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
   dir.create(mydir.today1)
   dir.create(mydir.today2)
-  build_models(run = 1:n, updatedat = TRUE, dir = mydir.today1)
+  build_models(run = 1:n, updatedat = TRUE, dir = mydir.today1,
+               dir.template = dir.template1)
   #build_models(run = 11:100, updatedat = TRUE, dir = mydir.today1)
   ## p1 <- SS_output('c:/SS/McGarvey//CAPAM_platoons_runs_22June/CAPAM_platoons_run001')
   ## SS_plots(p1)
 
-  # populate platoons directories with executable
-  r4ss::populate_multiple_folders(outerdir.old = mydir.today1,
-                                  outerdir.new = mydir.today1,
-                                  create.dir = FALSE, 
-                                  overwrite = FALSE,
-                                  use_ss_new = FALSE,
-                                  exe.dir = 'C:/ss/SSv3.30.16.02_Sept24',
-                                  exe.file = "ss.exe", 
-                                  exe.only = TRUE,
-                                  verbose = TRUE)
+  # using exe in path
+  ## # populate platoons directories with executable
+  ## r4ss::populate_multiple_folders(outerdir.old = mydir.today1,
+  ##                                 outerdir.new = mydir.today1,
+  ##                                 create.dir = FALSE, 
+  ##                                 overwrite = FALSE,
+  ##                                 use_ss_new = FALSE,
+  ##                                 exe.dir = 'C:/ss/SSv3.30.16.02_Sept24',
+  ##                                 exe.file = "ss.exe", 
+  ##                                 exe.only = TRUE,
+  ##                                 verbose = TRUE)
 
   runs <- 1:n
   dirs1 <- file.path(mydir.today1,
@@ -388,7 +404,7 @@ if(FALSE){
   ## modlist2[[79]] <- SS_output(dir(mydir.today2, full.names = TRUE)[79])
   modsum2 <- SSsummarize(modlist2)
   save(modlist1, modlist2, modsum1, modsum2,
-       file = file.path(file.path(mydir, 'stuff_29Oct2020.Rdata')))
+       file = file.path(file.path(mydir, 'stuff_3Dec2020.Rdata')))
 
   # format the output
   partable1 <- format_params(modsum1)
@@ -425,12 +441,12 @@ if(FALSE){
             file = file.path(mydir, "SS_exploitation_NO_platoons_14Aug2020.csv"),
             row.names = FALSE)
 
-  # summarize 40cm+ fish across models
+  # summarize 30cm+ fish across models
   modsum1$N30plus <- NULL
   modsum1$B30plus <- NULL
   modsum2$N30plus <- NULL
   modsum2$B30plus <- NULL
-  for (imod in 1:20) {
+  for (imod in 1:n) {
     info30plus1 <- get30plus(modlist1[[imod]])
     info30plus2 <- get30plus(modlist2[[imod]])
     modsum1$N30plus <- cbind(modsum1$N30plus, info30plus1$N30plus)
@@ -444,10 +460,10 @@ if(FALSE){
   modsum2$N30plus <- as.data.frame(modsum2$N30plus)
   modsum2$B30plus <- as.data.frame(modsum2$B30plus)
   # rename columns
-  names(modsum1$N30plus) <- paste0("run", 1:20)
-  names(modsum1$B30plus) <- paste0("run", 1:20)
-  names(modsum2$N30plus) <- paste0("run", 1:20)
-  names(modsum2$B30plus) <- paste0("run", 1:20)
+  names(modsum1$N30plus) <- paste0("run", 1:n)
+  names(modsum1$B30plus) <- paste0("run", 1:n)
+  names(modsum2$N30plus) <- paste0("run", 1:n)
+  names(modsum2$B30plus) <- paste0("run", 1:n)
   # add year column at the end
   modsum1$N30plus$Yr <- info30plus1$Yr
   modsum1$B30plus$Yr <- info30plus1$Yr
@@ -608,8 +624,3 @@ if(FALSE){
 # pure exploitation rate?
 # population numbers
 
-
-m1 <- SS_output('C:/SS/McGarvey/CAPAM_platoons_SS/IBM_data_22Oct2020/runs_with_platoons_13Nov/CAPAM_platoons_run001')
-m2 <- SS_output('C:/SS/McGarvey/CAPAM_platoons_SS/IBM_data_22Oct2020/runs_no_platoons_13Nov/CAPAM_platoons_run001')
-m3 <- SS_output('C:/SS/McGarvey/CAPAM_platoons_SS/IBM_data_22Oct2020/CAPAM_platoons_run001_ratio0.7')
-SSplotComparisons(SSsummarize(list(m1,m2,m3)))

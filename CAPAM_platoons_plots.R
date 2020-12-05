@@ -77,3 +77,9 @@ SSplotBiology(m2, subplot = 1, add = FALSE, colvec = rep(col.a, 3))
 SSplotBiology(m1, subplot = 1, add = TRUE, colvec = rep(col.b, 3))
 SSplotBiology(m3, subplot = 1, add = TRUE, colvec = rep(col.c, 3))
 legend('topleft', fill=c(col.a, col.b, col.c), legend=c('No platoons', 'Platoons with rho = 1.0', 'Platoons with rho = 0.7'))
+
+
+m1 <- SS_output('C:/SS/McGarvey/CAPAM_platoons_SS/IBM_data_22Oct2020/runs_with_platoons_13Nov/CAPAM_platoons_run001')
+m2 <- SS_output('C:/SS/McGarvey/CAPAM_platoons_SS/IBM_data_22Oct2020/runs_no_platoons_13Nov/CAPAM_platoons_run001')
+m3 <- SS_output('C:/SS/McGarvey/CAPAM_platoons_SS/IBM_data_22Oct2020/CAPAM_platoons_run001_ratio0.7')
+SSplotComparisons(SSsummarize(list(m1,m2,m3)))

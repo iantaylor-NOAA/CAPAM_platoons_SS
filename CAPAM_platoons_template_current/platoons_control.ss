@@ -2,7 +2,7 @@
 0  # 0 means do not read wtatage.ss; 1 means read and use wtatage.ss and also read and use growth parameters
 1  #_N_Growth_Patterns (Growth Patterns, Morphs, Bio Patterns, GP are terms used interchangeably in SS)
 5 #_N_platoons_Within_GrowthPattern
-1 #_Platoon_between/within_stdev_ratio (no read if N_platoons=1)
+0.7 #_Platoon_between/within_stdev_ratio (no read if N_platoons=1)
 0.031 0.237 0.464 0.237 0.031 #vector_platoon_dist_(-1_in_first_val_gives_normal_approx)
 #
 4 # recr_dist_method for parameters:  2=main effects for GP, Area, Settle timing; 3=each Settle entity; 4=none (only when N_GP*Nsettle*pop==1)
