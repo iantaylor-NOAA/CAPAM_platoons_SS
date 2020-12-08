@@ -269,12 +269,16 @@ format_params <- function(modsum){
   ##                        R0_thousands = exp(logR0),
   ##                        sigCl1tHL = NA,
   ##                        sigCw1Et1 = NA)
-  pars.out <- data.frame(K = get_par(pars, "VonBert_K_Fem_GP_1"),
-                         Linf_mm = 10*get_par(pars, "L_at_Amax_Fem_GP_1"),
-                         CV_old = get_par(pars, "CV_old_Fem_GP_1"),
-                         L50_mm = 10*L50,
-                         L95_mm = 10*(L50 + L50to95),
-                         R0_thousands = exp(logR0))
+  pars.out <- data.frame(
+    run = 1:modsum$n,
+    max_gradient = modsum$maxgrad,
+    converged = as.numeric(modsum$BratioSD[1, 1:modsum$n]) != 0,
+    K = get_par(pars, "VonBert_K_Fem_GP_1"),
+    Linf_mm = 10*get_par(pars, "L_at_Amax_Fem_GP_1"),
+    CV_old = get_par(pars, "CV_old_Fem_GP_1"),
+    L50_mm = 10*L50,
+    L95_mm = 10*(L50 + L50to95),
+    R0_thousands = exp(logR0))
   return(pars.out)
 }
 
@@ -291,9 +295,10 @@ format_params <- function(modsum){
 ## sigCw1Et1	1220.53
 
 get30plus <- function(mod, min = 30){
+  # calculate biomass and number of 30+ cm fish
   natlen <- mod$natlen
   Yr <- seq(1990, 2019.5, by = 0.5)
-  bins <- p1$lbinspop[p1$lbinspop >= min]
+  bins <- mod$lbinspop[mod$lbinspop >= min]
   # aggregate over platoons
   natlen.mat <- matrix(0, nrow = 60, ncol = length(bins))
   for(iplatoon in unique(natlen$Platoon)){
@@ -309,6 +314,29 @@ get30plus <- function(mod, min = 30){
   data.frame(Yr, N30plus = N30plus, B30plus = B30plus)
 }
 
+add30plus <- function(modsum, modlist){
+  # add biomass and number of 30+ cm fish to SSsummarize output
+    # summarize 30cm+ fish across models
+  modsum$N30plus <- NULL
+  modsum$B30plus <- NULL
+  for (imod in 1:n) {
+    info30plus <- get30plus(modlist[[imod]])
+    modsum$N30plus <- cbind(modsum$N30plus, info30plus$N30plus)
+    modsum$B30plus <- cbind(modsum$B30plus, info30plus$B30plus)
+  }
+  # convert to data.frame
+  modsum$N30plus <- as.data.frame(modsum$N30plus)
+  modsum$B30plus <- as.data.frame(modsum$B30plus)
+  # rename columns
+  names(modsum$N30plus) <- paste0("run", 1:n)
+  names(modsum$B30plus) <- paste0("run", 1:n)
+  # add year column at the end
+  modsum$N30plus$Yr <- info30plus$Yr
+  modsum$B30plus$Yr <- info30plus$Yr
+  # return modified data frame
+  modsum
+}
+
 if(FALSE){
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
 
@@ -318,7 +346,7 @@ if(FALSE){
              "OneWayTrip_FRising10YrsFr0top25_Mp15",
              "OneWayTrip_LessSteepSel_L95eq45")
 
-  for (icase in 2:4) {
+  for (icase in 1:4) {
     mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
                            cases[icase],
                            'IBMData')
@@ -358,7 +386,7 @@ if(FALSE){
       build_models(run = 1:n, updatedat = TRUE, dir = mydir.today1,
                    dir.template = dir.template_current)
     }
-        
+    
     runs <- 1:n
     dirs1 <- file.path(mydir.today1,
                        paste0('CAPAM_platoons_run',
@@ -423,82 +451,79 @@ if(FALSE){
          file = file.path(file.path(mydir, paste0('case', icase, '_stuff_4Dec2020.Rdata'))))
   }
   
-  # format the output
-  partable1 <- format_params(modsum1)
-  partable2 <- format_params(modsum2)
-
-  SSsummary_platoons <- modsum1
-  SSsummary_NOplatoons <- modsum2
-  save(SSsummary_platoons, SSsummary_NOplatoons,
-       file = file.path(file.path(mydir, 'SSsummaries_13Nov2020.Rdata')))
-
   # load stuff saved above
-  if (FALSE) {
-    load(file.path(mydir, 'stuff_29Oct2020.Rdata'))
-    load(file.path(mydir, 'SSsummaries_29Oct2020.Rdata'))
-  }
-  
-  # write to files
-  write.csv(partable1,
-            file = file.path(mydir, "SS_parameters_with_platoons_2July2020.csv"),
-            row.names = FALSE)
-  write.csv(partable2,
-            file = file.path(mydir, "SS_parameters_NO_platoons_2July2020.csv"),
-            row.names = FALSE)
-  write.csv(modsum1$recruits,
-            file = file.path(mydir, "SS_recruitment_with_platoons_14Aug2020.csv"),
-            row.names = FALSE)
-  write.csv(modsum2$recruits,
-            file = file.path(mydir, "SS_recruitment_NO_platoons_14Aug2020.csv"),
-            row.names = FALSE)
-  write.csv(modsum1$Fvalue,
-            file = file.path(mydir, "SS_exploitation_with_platoons_14Aug2020.csv"),
-            row.names = FALSE)
-  write.csv(modsum2$Fvalue,
-            file = file.path(mydir, "SS_exploitation_NO_platoons_14Aug2020.csv"),
-            row.names = FALSE)
+  source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
+  cases <- c("Baseline_KnifeEdge40cm_Fp4_Mp05",
+             "Baseline_LessSteepSel_L95eq45",
+             "OneWayTrip_FRising10YrsFr0top25_Mp15",
+             "OneWayTrip_LessSteepSel_L95eq45")
+  for (icase in 1:4) {
+    n <- 100
+    mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
+                           cases[icase],
+                           'IBMData')
+    out_ab <- file.path(mydir.dat, '../ResultsSSab')
+    out_pl <- file.path(mydir.dat, '../ResultsSSpl')
 
-  # summarize 30cm+ fish across models
-  modsum1$N30plus <- NULL
-  modsum1$B30plus <- NULL
-  modsum2$N30plus <- NULL
-  modsum2$B30plus <- NULL
-  for (imod in 1:n) {
-    info30plus1 <- get30plus(modlist1[[imod]])
-    info30plus2 <- get30plus(modlist2[[imod]])
-    modsum1$N30plus <- cbind(modsum1$N30plus, info30plus1$N30plus)
-    modsum1$B30plus <- cbind(modsum1$B30plus, info30plus1$B30plus)
-    modsum2$N30plus <- cbind(modsum2$N30plus, info30plus2$N30plus)
-    modsum2$B30plus <- cbind(modsum2$B30plus, info30plus2$B30plus)
-  }
-  # convert to data.frame
-  modsum1$N30plus <- as.data.frame(modsum1$N30plus)
-  modsum1$B30plus <- as.data.frame(modsum1$B30plus)
-  modsum2$N30plus <- as.data.frame(modsum2$N30plus)
-  modsum2$B30plus <- as.data.frame(modsum2$B30plus)
-  # rename columns
-  names(modsum1$N30plus) <- paste0("run", 1:n)
-  names(modsum1$B30plus) <- paste0("run", 1:n)
-  names(modsum2$N30plus) <- paste0("run", 1:n)
-  names(modsum2$B30plus) <- paste0("run", 1:n)
-  # add year column at the end
-  modsum1$N30plus$Yr <- info30plus1$Yr
-  modsum1$B30plus$Yr <- info30plus1$Yr
-  modsum2$N30plus$Yr <- info30plus1$Yr
-  modsum2$B30plus$Yr <- info30plus1$Yr
+    load(file.path(file.path(mydir, 'IBM_data_28Oct2020',
+                             paste0('case', icase,
+                                    '_stuff_4Dec2020.Rdata'))))
+    ## load(file.path(mydir, 'stuff_29Oct2020.Rdata'))
+    ## load(file.path(mydir, 'SSsummaries_29Oct2020.Rdata'))
+    
+    # summarize 30cm+ fish across models
+    modsum1 <- add30plus(modsum1, modlist1)
+    modsum2 <- add30plus(modsum2, modlist2)
 
-  write.csv(modsum1$N30plus,
-            file = file.path(mydir, "SS_numbers30plus_with_platoons_26Aug2020.csv"),
-            row.names = FALSE)
-  write.csv(modsum1$B30plus,
-            file = file.path(mydir, "SS_biomass30plus_with_platoons_26Aug2020.csv"),
-            row.names = FALSE)
-  write.csv(modsum2$N30plus,
-            file = file.path(mydir, "SS_numbers30plus_NO_platoons_26Aug2020.csv"),
-            row.names = FALSE)
-  write.csv(modsum2$B30plus,
-            file = file.path(mydir, "SS_biomass30plus_NO_platoons_26Aug2020.csv"),
-            row.names = FALSE)
+    # format the output
+    partable1 <- format_params(modsum1)
+    partable2 <- format_params(modsum2)
+
+    ## SSsummary_platoons <- modsum1
+    ## SSsummary_NOplatoons <- modsum2
+    ## save(SSsummary_platoons, SSsummary_NOplatoons,
+    ##      file = file.path(file.path(mydir, 'SSsummaries_13Nov2020.Rdata')))
+
+    print(cases[icase])
+    print(table(partable1$converged))
+    print(table(partable2$converged))
+    # turn off output to CSV files
+    write <- FALSE
+    
+    # write to files
+    if(write){
+      write.csv(partable1,
+                file = file.path(out_pl, "SS_parameters.csv"),
+                row.names = FALSE)
+      write.csv(partable2,
+                file = file.path(out_ab, "SS_parameters.csv"),
+                row.names = FALSE)
+      write.csv(modsum1$recruits,
+                file = file.path(out_pl, "SS_recruitment.csv"),
+                row.names = FALSE)
+      write.csv(modsum2$recruits,
+                file = file.path(out_ab, "SS_recruitment.csv"),
+                row.names = FALSE)
+      write.csv(modsum1$Fvalue,
+                file = file.path(out_pl, "SS_exploitation.csv"),
+                row.names = FALSE)
+      write.csv(modsum2$Fvalue,
+                file = file.path(out_ab, "SS_exploitation.csv"),
+                row.names = FALSE)
+      write.csv(modsum1$N30plus,
+                file = file.path(out_pl, "SS_numbers30plus.csv"),
+                row.names = FALSE)
+      write.csv(modsum2$N30plus,
+                file = file.path(out_ab, "SS_numbers30plus.csv"),
+                row.names = FALSE)
+      write.csv(modsum1$B30plus,
+                file = file.path(out_pl, "SS_biomass30plus.csv"),
+                row.names = FALSE)
+      write.csv(modsum2$B30plus,
+                file = file.path(out_ab, "SS_biomass30plus.csv"),
+                row.names = FALSE)
+    }
+  } # end loop over cases
   
   # p1a <- SS_output('C:/SS/McGarvey/CAPAM_platoons_runs_Oct29/CAPAM_platoons_run001')
   p1a <- modlist1[[1]]
@@ -507,7 +532,7 @@ if(FALSE){
 
   # plot illustrating platoons
   png(file.path(mydir, "platoons_run001_length_distribution_v2.png"),
-                width = 6.5, height = 5, res = 300, units ='in')
+      width = 6.5, height = 5, res = 300, units ='in')
   colvec <- rich.colors.short(6, alpha = 0.9)[-1]
   colvec <- adjustcolor(colvec, offset = c(-0.2, -0.2, -0.2, 0))
   #colvec <- rainbow(5, alpha = 1.0)
@@ -564,7 +589,7 @@ if(FALSE){
     as.numeric(modsum1$pars[modsum1$pars$Label=="VonBert_K_Fem_GP_1", 1:20]),
     xlim = c(80,140),
     ylim = c(0.05, 0.15)
-    )
+  )
   points(
     as.numeric(modsum2$pars[modsum2$pars$Label=="L_at_Amax_Fem_GP_1", 1:20]),
     as.numeric(modsum2$pars[modsum2$pars$Label=="VonBert_K_Fem_GP_1", 1:20]),
@@ -631,7 +656,7 @@ if(FALSE){
             tru = true$StartYrRAge0[true$irun == 1]),
          col = 2)
   
-}
+} # end if(FALSE)
 
 
 # things to send:
