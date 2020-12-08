@@ -310,102 +310,119 @@ get30plus <- function(mod, min = 30){
 }
 
 if(FALSE){
+  source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
+
   #### commands outside of a function
+  cases <- c("Baseline_KnifeEdge40cm_Fp4_Mp05",
+             "Baseline_LessSteepSel_L95eq45",
+             "OneWayTrip_FRising10YrsFr0top25_Mp15",
+             "OneWayTrip_LessSteepSel_L95eq45")
 
-  mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
-                         'Baseline_KnifeEdge40cm_Fp4_Mp05/IBMData')
-  mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
-                         'OneWayTrip_FRising10YrsFr0top25_Mp15/IBMData')
+  for (icase in 2:4) {
+    mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
+                           cases[icase],
+                           'IBMData')
+    ## mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
+    ##                        'Baseline_KnifeEdge40cm_Fp4_Mp05/IBMData')
+    ## mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
+    ##                        'OneWayTrip_FRising10YrsFr0top25_Mp15/IBMData')
+    
+    mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_4Dec')
+    mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_4Dec')
+    dir.template_current <- file.path(mydir, 'CAPAM_platoons_template_current')
+    dir.template_initF <- file.path(mydir, 'CAPAM_platoons_template_initF')
+
+    n <- 100
+    
+    # read files from Richard McGarvey
+    agelen <- read.table(file.path(mydir.dat, 'AGE-LENGTH41.OUT'),
+                         skip = 2, header = TRUE)
+    cwe <- read.table(file.path(mydir.dat, 'CwEByMonth.OUT'),
+                      skip = 1, header = TRUE)
+    true <- read.table(file.path(mydir.dat, 'True_IBM_Values.TRU'),
+                       skip = 7, header = TRUE)
+    
+    # subset to simulation 1 only
+    agelen1 <- agelen[agelen$irun == 1,]
+    cwe1 <- cwe[cwe$RUN == 1,]
+
+    # source this function
+    source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
+    dir.create(mydir.today1)
+    dir.create(mydir.today2)
+    if (icase %in% 1:2) {
+      build_models(run = 1:n, updatedat = TRUE, dir = mydir.today1,
+                   dir.template = dir.template_initF)
+    }
+    if (icase %in% 3:4) {
+      build_models(run = 1:n, updatedat = TRUE, dir = mydir.today1,
+                   dir.template = dir.template_current)
+    }
+        
+    runs <- 1:n
+    dirs1 <- file.path(mydir.today1,
+                       paste0('CAPAM_platoons_run',
+                              substring(1000 + runs, 2)))
+    # copy platoons directories to no-platoons directories and then remove platoons
+    r4ss::populate_multiple_folders(outerdir.old = mydir.today1,
+                                    outerdir.new = mydir.today2,
+                                    create.dir = TRUE, 
+                                    overwrite = TRUE,
+                                    use_ss_new = FALSE,
+                                    exe.dir = 'C:/ss/SSv3.30.16.02_Sept24',
+                                    exe.file = "ss.exe", 
+                                    exe.only = FALSE,
+                                    verbose = TRUE)
+    dirs2 <- dir(mydir.today2, full.names = TRUE)
+    for(idir in dirs2){
+      remove_platoons(idir)
+    }
+  } # end loop over cases
+
   
-  mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_3Dec')
-  mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_3Dec')
-  dir.template1 <- file.path(mydir, 'CAPAM_platoons_template_current')
-  dir.template2 <- file.path(mydir, 'CAPAM_platoons_template_initF')
-  n <- 1
-
-  
-  # read files from Richard McGarvey
-  agelen <- read.table(file.path(mydir.dat, 'AGE-LENGTH41.OUT'),
-                       skip = 2, header = TRUE)
-  cwe <- read.table(file.path(mydir.dat, 'CwEByMonth.OUT'),
-                    skip = 1, header = TRUE)
-  true <- read.table(file.path(mydir.dat, 'True_IBM_Values.TRU'),
-                     skip = 7, header = TRUE)
-  n <- 10
-  
-  # subset to simulation 1 only
-  agelen1 <- agelen[agelen$irun == 1,]
-  cwe1 <- cwe[cwe$RUN == 1,]
-
-  # source this function
-  source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
-  dir.create(mydir.today1)
-  dir.create(mydir.today2)
-  build_models(run = 1:n, updatedat = TRUE, dir = mydir.today1,
-               dir.template = dir.template1)
-  #build_models(run = 11:100, updatedat = TRUE, dir = mydir.today1)
-  ## p1 <- SS_output('c:/SS/McGarvey//CAPAM_platoons_runs_22June/CAPAM_platoons_run001')
-  ## SS_plots(p1)
-
-  # using exe in path
-  ## # populate platoons directories with executable
-  ## r4ss::populate_multiple_folders(outerdir.old = mydir.today1,
-  ##                                 outerdir.new = mydir.today1,
-  ##                                 create.dir = FALSE, 
-  ##                                 overwrite = FALSE,
-  ##                                 use_ss_new = FALSE,
-  ##                                 exe.dir = 'C:/ss/SSv3.30.16.02_Sept24',
-  ##                                 exe.file = "ss.exe", 
-  ##                                 exe.only = TRUE,
-  ##                                 verbose = TRUE)
-
-  runs <- 1:n
-  dirs1 <- file.path(mydir.today1,
-                     paste0('CAPAM_platoons_run',
-                            substring(1000 + runs, 2)))
-  # copy platoons directories to no-platoons directories and then remove platoons
-  r4ss::populate_multiple_folders(outerdir.old = mydir.today1,
-                                  outerdir.new = mydir.today2,
-                                  create.dir = TRUE, 
-                                  overwrite = TRUE,
-                                  use_ss_new = FALSE,
-                                  exe.dir = 'C:/ss/SSv3.30.16.02_Sept24',
-                                  exe.file = "ss.exe", 
-                                  exe.only = FALSE,
-                                  verbose = TRUE)
-  dirs2 <- dir(mydir.today2, full.names = TRUE)
-  for(idir in dirs2){
-    remove_platoons(idir)
-  }
-
   # run the models
+
   source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
-  #n <- 100
-  r4ss::run_SS_models(dirvec = dir(mydir.today1, full.names = TRUE)[1:n],
-                         systemcmd = TRUE, skipfinished = FALSE,
-                         extras = "-nox",
-                         intern = TRUE)
-  source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
-  r4ss::run_SS_models(dirvec = dir(mydir.today2, full.names = TRUE)[1:n],
-                         systemcmd = TRUE, skipfinished = FALSE,
-                         extras = "-nox",
-                         intern = TRUE)
+  cases <- c("Baseline_KnifeEdge40cm_Fp4_Mp05",
+             "Baseline_LessSteepSel_L95eq45",
+             "OneWayTrip_FRising10YrsFr0top25_Mp15",
+             "OneWayTrip_LessSteepSel_L95eq45")
 
-  # get the output and summarize it (1 is with platoons, 2 is without)
-  modlist1 <- SSgetoutput(dirvec = dir(mydir.today1, full.names = TRUE)[1:n],
-                          getcovar = FALSE)
-  ## # replace run 79 after manual fix to remove 0 observations
-  ## modlist1[[79]] <- SS_output(dir(mydir.today1, full.names = TRUE)[79])
-  modsum1 <- SSsummarize(modlist1)
+  for (icase in 4) {
+    n <- 100
+    mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
+                           cases[icase],
+                           'IBMData')
+    mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_4Dec')
+    mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_4Dec')
 
-  modlist2 <- SSgetoutput(dirvec = dir(mydir.today2, full.names = TRUE)[1:n],
-                          getcovar = FALSE)
-  ## # replace run 79 after manual fix to remove 0 observations
-  ## modlist2[[79]] <- SS_output(dir(mydir.today2, full.names = TRUE)[79])
-  modsum2 <- SSsummarize(modlist2)
-  save(modlist1, modlist2, modsum1, modsum2,
-       file = file.path(file.path(mydir, 'stuff_3Dec2020.Rdata')))
+    #n <- 100
+    r4ss::run_SS_models(dirvec = dir(mydir.today1, full.names = TRUE)[1:n],
+                        systemcmd = TRUE, skipfinished = FALSE,
+                        extras = "-nox",
+                        intern = TRUE)
+    source('c:/ss/McGarvey/CAPAM_platoons_SS/CAPAM_platoons_notes.R')
+    r4ss::run_SS_models(dirvec = dir(mydir.today2, full.names = TRUE)[1:n],
+                        systemcmd = TRUE, skipfinished = FALSE,
+                        extras = "-nox",
+                        intern = TRUE)
 
+    # get the output and summarize it (1 is with platoons, 2 is without)
+    modlist1 <- SSgetoutput(dirvec = dir(mydir.today1, full.names = TRUE)[1:n],
+                            getcovar = FALSE)
+    ## # replace run 79 after manual fix to remove 0 observations
+    ## modlist1[[79]] <- SS_output(dir(mydir.today1, full.names = TRUE)[79])
+    modsum1 <- SSsummarize(modlist1)
+
+    modlist2 <- SSgetoutput(dirvec = dir(mydir.today2, full.names = TRUE)[1:n],
+                            getcovar = FALSE)
+    ## # replace run 79 after manual fix to remove 0 observations
+    ## modlist2[[79]] <- SS_output(dir(mydir.today2, full.names = TRUE)[79])
+    modsum2 <- SSsummarize(modlist2)
+    save(modlist1, modlist2, modsum1, modsum2,
+         file = file.path(file.path(mydir, paste0('case', icase, '_stuff_4Dec2020.Rdata'))))
+  }
+  
   # format the output
   partable1 <- format_params(modsum1)
   partable2 <- format_params(modsum2)
