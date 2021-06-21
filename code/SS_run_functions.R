@@ -293,6 +293,7 @@ get30plus <- function(mod, min = 30){
 }
 
 add30plus <- function(modsum, modlist){
+  n <- modsum[["n"]]
   # add biomass and number of 30+ cm fish to SSsummarize output
     # summarize 30cm+ fish across models
   modsum$N30plus <- NULL
