@@ -168,7 +168,7 @@ build_models <- function(runs = 1:2, # change default for now to avoid running t
                          dir.template,
                          updatedat = FALSE,
                          overwrite = TRUE,
-                         dir){
+                         dir, agelen, cwe){
   for(irun in runs){
 
     # copy all non-data files
@@ -319,3 +319,16 @@ add30plus <- function(modsum, modlist){
 re <- function(est, tru){
     (est - tru)/tru
 }
+
+make_plotting_df <- function(scen_list, scen_name, platoons = TRUE, metric) {
+  if(platoons == TRUE) {
+    platoon_str <- "platoons"
+  } else {
+    platoon_str <- "no_platoons"
+  }
+  df <- scen_list[[platoon_str]][[metric]]
+  df$scen <- scen_name
+  df$platoons <- platoons
+  df
+  }
+
