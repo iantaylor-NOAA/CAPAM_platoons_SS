@@ -80,31 +80,6 @@ partbl_df <- partbl_df[partbl_df$converged == TRUE, ]
 not_converged <- partbl_df[partbl_df$converged == FALSE, c("run", "scen", "platoons")]
 print(nrow(not_converged))
 
-# look for parameters on bounds ----
-
-get_params_on_bounds <- function(dir) {
-  out <- r4ss::SS_output(dir, verbose = F, printstats = F)
-  params_on_bounds <- tidyr::drop_na(
-    out$parameters[out$parameters$Status == "HI"|
-                    out$parameters$Status == "LO", ],Status)
- params_on_bounds <- paste0(params_on_bounds$Label, collapse = ", ")
-}
-
-mod_paths_platoon <- file.path("output", basename(outer_folder), cases, paste0("runs_plats_", run_date))
-mod_paths_platoon <- unlist(lapply(mod_paths_platoon, function(x) list.dirs(x, recursive = FALSE)))
-
-
-mod_paths_no_platoon <-  
-  file.path("output", basename(outer_folder), cases, paste0("runs_no_plats_", run_date))
-mod_paths_no_platoon <- unlist(lapply(mod_paths_platoon, 
-                                      function(x) list.dirs(x, recursive = FALSE)))
-mod_paths_all <- c(mod_paths_platoon, mod_paths_no_platoon)
-
-future::plan(multisession)
-all_params_on_bounds <- furrr::future_map(mod_paths_all, ~get_params_on_bounds)
-all_params_on_bounds_vec <- unlist(all_params_on_bounds)
-unique(all_params_on_bounds_vec)
-
 # partable, look at estimates -----
 partbl_long <- gather(partbl_df, key = "parameter", value = "value", 4:9)
 

@@ -330,5 +330,13 @@ make_plotting_df <- function(scen_list, scen_name, platoons = TRUE, metric) {
   df$scen <- scen_name
   df$platoons <- platoons
   df
-  }
+}
+
+get_params_on_bounds <- function(dir) {
+  out <- r4ss::SS_output(dir, verbose = F, printstats = F)
+  params_on_bounds <- tidyr::drop_na(
+    out$parameters[out$parameters$Status == "HI"|
+                     out$parameters$Status == "LO", ],Status)
+  params_on_bounds <- paste0(params_on_bounds$Label, collapse = ", ")
+}
 
