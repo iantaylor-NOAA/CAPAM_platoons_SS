@@ -1,8 +1,10 @@
 ---
 title: "Scenarios with K_LINFcvp2, Stock Synthesis EM runs"
 author: "Kathryn Doering"
-date: "6/21/2021"
-output: html_document
+date: "6/24/2021"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -21,7 +23,7 @@ mydir <- getwd()
 outer_folder <- file.path(mydir, "Scen_K_LINFcvp2")
 outer_folder_output <- file.path(mydir, "output", basename(outer_folder))
 cases <- list.dirs(outer_folder_output, full.names = FALSE, recursive = FALSE)
-run_date <-  "2021_06_21"
+run_date <-  "2021_06_24"
 print(cases)
 ```
 For each of the OM Scenarios, there were 100 data sets, so each iteration of a scenario used a different dataset from the OM.

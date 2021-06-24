@@ -11,7 +11,7 @@ mydir <- getwd()
 outer_folder <- file.path(mydir, "Scen_K_LINFcvp2")
 outer_folder_output <- file.path(mydir, "output", basename(outer_folder))
 cases <- list.dirs(outer_folder_output, full.names = FALSE, recursive = FALSE)
-run_date <-  "2021_06_21"
+run_date <-  "2021_06_24"
 
 Rdata_folder <- file.path("Rdata_output", basename(outer_folder))
 
@@ -32,3 +32,6 @@ all_params_on_bounds <- furrr::future_map(mod_paths_all, ~get_params_on_bounds(.
 all_params_on_bounds_vec <- unlist(all_params_on_bounds)
 names(all_params_on_bounds_vec) <- mod_paths_all
 unique(all_params_on_bounds_vec)
+
+write.csv(all_params_on_bounds_vec, paste0("all_params_on_bounds_", run_date, ".csv"))
+

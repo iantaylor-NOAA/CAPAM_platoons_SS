@@ -13,7 +13,7 @@ mydir <- getwd()
 outer_folder <- file.path(mydir, "Scen_K_LINFcvp2")
 outer_folder_output <- file.path(mydir, "output", basename(outer_folder))
 cases <- list.dirs(outer_folder_output, full.names = FALSE, recursive = FALSE)
-run_date <-  "2021_06_21"
+run_date <-  "2021_06_24"
 
 Rdata_folder <- file.path("Rdata_output", basename(outer_folder))
 
