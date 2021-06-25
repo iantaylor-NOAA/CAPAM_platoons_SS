@@ -35,3 +35,4 @@ unique(all_params_on_bounds_vec)
 
 write.csv(all_params_on_bounds_vec, paste0("all_params_on_bounds_", run_date, ".csv"))
 
+# About 6 models have params on bounds still. perhaps ok?

@@ -3,8 +3,8 @@ title: "Scenarios with K_LINFcvp2, Stock Synthesis EM runs"
 author: "Kathryn Doering"
 date: "6/24/2021"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -309,12 +309,7 @@ ggplot(recruits_df_long, aes(x = Yr, y = recruits)) +
 
 ## TODO
 
-Change 0.3 as the upper bound for CV old to 0.5.
-
-Check out bounds of other runs (maybe using ss3sim summary fxns?) To see if
-any other bounds need to be changed
-
-Rerun simulations
+Investigate the few models that still have params on bounds
 
 
 
