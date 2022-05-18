@@ -19,6 +19,7 @@
 
 # RStudio files
 .Rproj.user/
+*.Rproj
 
 # produced vignettes
 vignettes/*.html
@@ -42,6 +43,8 @@ vignettes/*.pdf
 runs*
 output
 IBM_data*
+Scen_K_LINFcvp2
+console.output.txt
 
 # Rdata files
 *.Rdata
