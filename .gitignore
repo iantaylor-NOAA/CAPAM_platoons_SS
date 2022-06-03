@@ -43,7 +43,7 @@ vignettes/*.pdf
 runs*
 output
 IBM_data*
-Scen_K_LINFcvp2
+Scen_K_LINFcvp2/*/Results*
 console.output.txt
 
 # Rdata files
