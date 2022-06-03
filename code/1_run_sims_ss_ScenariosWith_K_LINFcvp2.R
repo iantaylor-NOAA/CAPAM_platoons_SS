@@ -66,7 +66,7 @@ for (icase in cases) {
   }
   if (icase %in% grep("OneWayTrip", cases, value = TRUE)) {
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
-                 use_initF = FALSE< dir.template = dir.template_current, 
+                 use_initF = FALSE, dir.template = dir.template_current, 
                  agelen = agelen, 
                  cwe = cwe, M_val = 0.15) #base on what we were told the setting in the IBM was
   }
@@ -92,11 +92,11 @@ for (icase in cases) {
   mydir_today_plat <- file.path(outer_folder_output, icase, paste0("runs_plats_", run_date))
   mydir_today_no_plat <- file.path(outer_folder_output, icase, paste0("runs_no_plats_", run_date))
   
-  SSutils::run_SS_models_parallel(dirvec = dir(mydir_today_plat, full.names = TRUE)[seq_len(n)],
+  SSutils::run_SS_models(dirvec = dir(mydir_today_plat, full.names = TRUE)[seq_len(n)],
                       systemcmd = TRUE, skipfinished = FALSE,
                       extras = "-nox", model = ss_name, exe_in_path = TRUE,
                       intern = TRUE)
-  SSutils::run_SS_models_parallel(dirvec = dir(mydir_today_no_plat, full.names = TRUE)[seq_len(n)],
+  SSutils::run_SS_models(dirvec = dir(mydir_today_no_plat, full.names = TRUE)[seq_len(n)],
                       systemcmd = TRUE, skipfinished = FALSE,
                       extras = "-nox", model = ss_name, exe_in_path = TRUE,
                       intern = TRUE)

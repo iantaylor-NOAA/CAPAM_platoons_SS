@@ -19,11 +19,11 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
       # define month ranges
       if(s == 1){
         months <- 1:6
-        month <- 3
+        month <- 4
       }
       if(s == 2){
         months <- 7:12
-        month <- 9
+        month <- 10
       }
       catch.value <- sum(cwe.i$CAWT[cwe.i$YR == y & cwe.i$MONTH %in% months])
       datfile$catch$catch[datfile$catch$year == y &
@@ -192,7 +192,7 @@ build_models <- function(runs = 1:2, # change default for now to avoid running t
               file.path(newdir, 'ss.exe'), overwrite = overwrite)
 # change control file ----
       # add to the ctl file changes
-      dat <- r4ss::SS_readdat(file.path(dir.template, "platoons_data_template.ss"))
+      dat <- r4ss::SS_readdat(file.path(dir.template, "platoon_data_template.ss"))
       ctl <- r4ss::SS_readctl(file.path(newdir, "platoons_control.ss"),
        use_datlist = TRUE, datlist = dat)
     if(use_initF) {
