@@ -74,11 +74,11 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
       # define month ranges
       if(s == 1){
         months <- 1:6
-        month <- 3
+        month <- 4
       }
       if(s == 2){
         months <- 7:12
-        month <- 9
+        month <- 10
       }
       # subset rows of the IBM output
       samps <- agelen.i[agelen.i$iyear == y & agelen.i$itspy %in% months,]
@@ -196,7 +196,7 @@ build_models <- function(runs = 1:2, # change default for now to avoid running t
       ctl <- r4ss::SS_readctl(file.path(newdir, "platoons_control.ss"),
        use_datlist = TRUE, datlist = dat)
     if(use_initF) {
-      ctl$init_F <- data.frame(LO = c(0,0), HI = 0.8, INIT = 0.4, PRIOR = 0.1, 
+      ctl$init_F <- data.frame(LO = c(0.01, 0.01), HI = 0.8, INIT = 0.4, PRIOR = 0.1, 
                                PR_SD = 99, PR_type = 0, PHASE = 2, PType = 18)
       rownames(ctl$init_F) <- c("InitF_seas_1_flt_1fishery",
                                 "InitF_seas_2_flt_1fishery")

@@ -2,7 +2,7 @@
 0  # 0 means do not read wtatage.ss; 1 means read and use wtatage.ss and also read and use growth parameters
 1  #_N_Growth_Patterns (Growth Patterns, Morphs, Bio Patterns, GP are terms used interchangeably in SS)
 5 #_N_platoons_Within_GrowthPattern
-0.7 #_Platoon_between/within_stdev_ratio (no read if N_platoons=1)
+0.5 #_Platoon_between/within_stdev_ratio (no read if N_platoons=1)
 0.031 0.237 0.464 0.237 0.031 #vector_platoon_dist_(-1_in_first_val_gives_normal_approx)
 #
 4 # recr_dist_method for parameters:  2=main effects for GP, Area, Settle timing; 3=each Settle entity; 4=none (only when N_GP*Nsettle*pop==1)
@@ -40,7 +40,7 @@
 0 #_natM_type:_0=1Parm; 1=N_breakpoints;_2=Lorenzen;_3=agespecific;_4=agespec_withseasinterpolate
 #
 1 # GrowthModel: 1=vonBert with L1&L2; 2=Richards with L1&L2; 3=age_specific_K_incr; 4=age_specific_K_decr; 5=age_specific_K_each; 6=NA; 7=NA; 8=growth cessation
-1 #_Age(post-settlement)_for_L1;linear growth below this
+0 #_Age(post-settlement)_for_L1;linear growth below this
 999 #_Growth_Age_for_L2 (999 to use as Linf)
 -999 #_exponential decay for growth above maxage (value should approx initial Z; -999 replicates 3.24; -998 to not allow growth above maxage)
 0  #_placeholder for future growth feature
@@ -58,12 +58,11 @@
 #_LO    HI      INIT    PRIOR   PR_SD   PR_type PHASE   envvar  dev_lnk dv_mnyr dv_mxyr dev_PH  Block   Block_Fxn
 #       Sex:    1       BioPattern:     1       NatMort
 0.01    0.4     0.15    0.15    99      0       -3       0       0       0       0       0       0       0       #       NatM_p_1_Fem_GP_1
-#       Sex:    1       BioPattern:     1       Growth
-5       40      20      20      99      0       2       0       0       0       0       0       0       0       #       L_at_Amin_Fem_GP_1
-50      150     100     100     99      0       2       0       0       0       0       0       0       0       #       L_at_Amax_Fem_GP_1
+0.01       40      1      20      99      0       -2       0       0       0       0       0       0       0       #       L_at_Amin_Fem_GP_1
+50      150     100     100     99      0       3       0       0       0       0       0       0       0       #       L_at_Amax_Fem_GP_1
 0.01    0.4     0.1     0.1     99      0       3       0       0       0       0       0       0       0       #       VonBert_K_Fem_GP_1
 0.01    0.5     0.1     0.1     99      0       3       0       0       0       0       0       0       0       #       CV_young_Fem_GP_1
-0.01    0.5     0.25    0.25    99      0       3       0       0       0       0       0       0       0       #       CV_old_Fem_GP_1
+0.01    0.5     0.10    0.10    99      0       3       0       0       0       0       0       0       0       #       CV_old_Fem_GP_1
 #       Sex:    1       BioPattern:     1       WtLen
 -3      3   2.1733e-5 2.1733e-5 99      0       -3      0       0       0       0       0       0       0       #       Wtlen_1_Fem_GP_1
 -3      4       2.86    2.86    99      0       -3      0       0       0       0       0       0       0       #       Wtlen_2_Fem_GP_1
@@ -98,9 +97,9 @@
              0             2             0             1            50             0        -50          0          0          0          0          0          0          0 # SR_autocorr
 #_no timevary SR parameters
 1 #do_recdev:  0=none; 1=devvector (R=F(SSB)+dev); 2=deviations (R=F(SSB)+dev); 3=deviations (R=R0*dev; dev2=R-f(SSB)); 4=like 3 with sum(dev2) adding penalty
-1966 # first year of main recr_devs; early devs can preceed this era
+1985# first year of main recr_devs; early devs can preceed this era
 2019 # last year of main recr_devs; forecast devs start in following year
-5 #_recdev phase
+4 #_recdev phase
 1 # (0/1) to read 13 advanced options
  0 #_recdev_early_start (0=none; neg value makes relative to recdev_start)
  -4 #_recdev_early_phase
@@ -238,6 +237,7 @@
 # 10=recrdev; 11=parm_prior; 12=parm_dev; 13=CrashPen; 14=Morphcomp; 15=Tag-comp; 16=Tag-negbin; 17=F_ballpark
 #like_comp fleet  phase  value  sizefreq_method
 7          1      1      0      99 # turn off likelihood for mean length at age
+ 10        1      1     .1      1  #RICK zccdc					  
 #9          1      1      0.1    99 # reduce likelihood for initial equilibrium catch
 -9999      1      1      1      1  #  terminator
 
