@@ -1,7 +1,7 @@
 makedat <- function(irun, agelen.i, cwe.i, dir.i,
                     dir.template,
-                    init_catch = FALSE,
                     overwrite = FALSE,
+                    use_initF = FALSE,
                     verbose = TRUE, yrs){
   # read dummy data file
   datfile <- SS_readdat(file.path(dir.template,
@@ -42,12 +42,12 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
 
   # use average catch for first 5 years as equilibrium value
   # summing across seasons and dividing by 5 should get an annual value
-  if(init_catch){
-    for(s in 1:2){
+  if (use_initF) {
+    for (s in c(2,1)) {
       catch.5yr.avg.s <- sum(datfile$catch$catch[datfile$catch$year %in% 1990:1994 &
                                                  datfile$catch$seas == s])/5
-      datfile$catch$catch[datfile$catch$year == -999 &
-                          datfile$catch$seas == s] <- catch.5yr.avg.s
+      tmp_catch <- data.frame(year = -999, seas = s, fleet = 1, catch = catch.5yr.avg.s, catch_se = 2.00)
+      datfile$catch <- rbind(tmp_catch, datfile$catch)
     }
   }
   
@@ -166,8 +166,10 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
 
 build_models <- function(runs = 1:2, # change default for now to avoid running too many models at first
                          dir.template,
+                         use_initF = FALSE,
                          updatedat = FALSE,
                          overwrite = TRUE,
+                         M_val  = 0.05, # default
                          dir, agelen, cwe){
   for(irun in runs){
 
@@ -188,6 +190,20 @@ build_models <- function(runs = 1:2, # change default for now to avoid running t
               file.path(newdir, 'platoons_control.ss'), overwrite = overwrite)
     file.copy(file.path(dir.template, 'ss.exe'),
               file.path(newdir, 'ss.exe'), overwrite = overwrite)
+# change control file ----
+      # add to the ctl file changes
+      dat <- r4ss::SS_readdat(file.path(dir.template, "platoons_data_template.ss"))
+      ctl <- r4ss::SS_readctl(file.path(newdir, "platoons_control.ss"),
+       use_datlist = TRUE, datlist = dat)
+    if(use_initF) {
+      ctl$init_F <- data.frame(LO = c(0,0), HI = 0.8, INIT = 0.4, PRIOR = 0.1, 
+                               PR_SD = 99, PR_type = 0, PHASE = 2, PType = 18)
+      rownames(ctl$init_F) <- c("InitF_seas_1_flt_1fishery",
+                                "InitF_seas_2_flt_1fishery")
+    }
+    ctl$MG_parms["NatM_p_1_Fem_GP_1", "INIT" ] <- M_val
+    r4ss::SS_writectl(ctl, file.path(newdir, "platoons_control.ss"),
+                       overwrite = TRUE)
 
     # update data file (not needed if change is only to control)
     if(updatedat){
@@ -198,6 +214,7 @@ build_models <- function(runs = 1:2, # change default for now to avoid running t
               cwe.i     = cwe.i,
               dir.i     = newdir,
               dir.template = dir.template,
+              use_initF = use_initF,
               overwrite = overwrite,
               verbose = FALSE, yrs = yrs)
     }
