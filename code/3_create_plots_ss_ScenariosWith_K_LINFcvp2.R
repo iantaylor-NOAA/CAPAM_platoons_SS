@@ -10,7 +10,7 @@ library(purrr)
 
 # fixed values ----
 mydir <- getwd()
-outer_folder <- file.path(mydir, "Scen_K_LINFcvp2")
+outer_folder <- file.path(mydir, "Scenarios")
 outer_folder_output <- file.path(mydir, "output", basename(outer_folder))
 cases <- list.dirs(outer_folder_output, full.names = FALSE, recursive = FALSE)
 run_date <-  "2021_06_24"

@@ -17,9 +17,9 @@ accuage <- 24
 yrs <- 1990:2019
 
 # total number of sim runs per case
-n <- 1 # to start
+n <- 1 
 # vector of cases
-outer_folder <- file.path(mydir, "Scen_K_LINFcvp2")
+outer_folder <- file.path(mydir, "Scenarios")
 # note: expecting there to be 4 cases.
 cases <- list.dirs(outer_folder, full.names = FALSE, recursive = FALSE)
 
@@ -29,6 +29,10 @@ run_date <- "2022_06_03"
 dir.create("output_profile")
 outer_folder_output <- file.path("output_profile", basename(outer_folder))
 dir.create(outer_folder_output)
+
+# vector of platoon ratio number
+vec_of_plat_ratio <- seq(0.2, 1.6, by = 0.2)
+
 
 # setup for run ----
 for (icase in cases) {
@@ -46,25 +50,34 @@ for (icase in cases) {
                      skip = 7, header = TRUE)
   
   dir.create(mydir_today_plat)
-  dir.create(mydir_today_no_plat)
 
-  if (icase %in% grep("Baseline", cases, value = TRUE)) {
+  if (icase %in% grep("A_II_Fp4", cases, value = TRUE)) {
     # for baseline, want to use init F
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat, 
       use_initF = TRUE, dir.template = dir.template_current, agelen = agelen, 
-      cwe = cwe, M_val = 0.05) # based on what we were told the setting in the IBM was...
+      cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1)) # based on what we were told the setting in the IBM was...
   }
-  if (icase %in% grep("OneWayTrip", cases, value = TRUE)) {
+  if (icase %in% grep("B_II_Fp4", cases, value = TRUE)) {
+    # for baseline, want to use init F
+    build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat, 
+      use_initF = TRUE, dir.template = dir.template_current, agelen = agelen, 
+      cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2)) # based on what we were told the setting in the IBM was...
+  }
+  if (icase %in% grep("A_II_1WayTrip", cases, value = TRUE)) {
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
                  use_initF = FALSE, dir.template = dir.template_current, 
                  agelen = agelen, 
-                 cwe = cwe, M_val = 0.15) #base on what we were told the setting in the IBM was
+                 cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1)) #base on what we were told the setting in the IBM was
   }
-  
-  dirs1 <- file.path(mydir_today_plat,
-                     paste0('run',
-                            substring(1000 + seq_len(n), 2)))
+  if (icase %in% grep("B_II_1WayTrip", cases, value = TRUE)) {
+    build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
+                 use_initF = FALSE, dir.template = dir.template_current, 
+                 agelen = agelen, 
+                 cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2)) #base on what we were told the setting in the IBM was
+  }
+}
 
+# Run models ----
 for (icase in cases) { 
   mydir_today_plat <- file.path(outer_folder_output, icase, paste0("runs_plats_", run_date))
   SSutils::run_SS_models(dirvec = dir(mydir_today_plat, full.names = TRUE)[seq_len(n)],
@@ -75,8 +88,6 @@ for (icase in cases) {
 
 # Run profile for each of the 4 scenarios ----
 
-vec_of_plat_ratio <- seq(0.4, 1.6, by = 0.2)
-#vec_of_plat_ratio <- c(0.2, 0.3) # to test
 for(icase in cases) {
     plat_scen_path <- file.path(outer_folder_output, icase, paste0("runs_plats_", run_date))
     dat <- r4ss::SS_readdat(file.path(plat_scen_path, "CAPAM_platoons_run001", 
@@ -108,7 +119,7 @@ i <- 0
 for (icase in cases) { 
   plat_scen_path <- file.path(outer_folder_output, icase, paste0("runs_plats_", run_date))
   i <- i + 1
-  tot_vec_of_plat <- c(0.2, 0.3, seq(0.4, 1.6, by = 0.2))
+  tot_vec_of_plat <- vec_of_plat_ratio
   results[[i]] <- lapply(tot_vec_of_plat, function(ratio, scen_path, case) {
     if(file.exists(file.path(scen_path, paste0("profile_", as.character(ratio)), "control.ss_new"))) {
       out <- r4ss::SS_output(file.path(scen_path, paste0("profile_", ratio)))

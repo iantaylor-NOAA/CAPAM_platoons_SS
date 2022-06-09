@@ -13,7 +13,7 @@ yrs <- 1990:2019
 # total number of sim runs per case
 n <- 2 # to start
 # vector of cases
-outer_folder <- file.path(mydir, "Scen_K_LINFcvp2")
+outer_folder <- file.path(mydir, "Scenarios")
 # note: expecting there to be 4 cases.
 cases <- list.dirs(outer_folder, full.names = FALSE, recursive = FALSE)
 
@@ -35,18 +35,6 @@ for (icase in cases) {
   mydir_today_plat <- file.path(outer_folder_output, icase, paste0("runs_plats_", run_date))
   mydir_today_no_plat <- file.path(outer_folder_output, icase, paste0("runs_no_plats_", run_date))
   dir.template_current <- file.path('CAPAM_platoons_template_current')
-  #dir.template_initF <- file.path('CAPAM_platoons_template_initF')
-  # only differences are 2 lines for init F in catch data:
-  # -999 1 1 1000 2.0 # equilibrium catch for season 1
-  # -999 2 1 1000 2.0 # equilibrium catch for season 2 
-  # and in ctl file
-  # 1 #_Platoon_between/within_stdev_ratio (no read if N_platoons=1), but maybe this should be set differently.
-  # as well as 2 init F params for init F:
-  # #_initial_F_parms; count = 0
-  #_ LO HI INIT PRIOR PR_SD  PR_type  PHASE
-  #  0  0.8 0.4  0.1    99     0        2 # InitF_seas_1_flt_1fishery
-  #  0  0.8 0.4  0.1    99     0        2 # InitF_seas_2_flt_1fishery
-  
   # read the OM files (output from IBM)
   agelen <- read.table(file.path(mydir.dat, 'AGE-LENGTH41.OUT'),
                        skip = 2, header = TRUE)
@@ -57,20 +45,31 @@ for (icase in cases) {
   
   dir.create(mydir_today_plat)
   dir.create(mydir_today_no_plat)
-
-  if (icase %in% grep("Baseline", cases, value = TRUE)) {
+  # note that A indicates runs with CV = 0.1, while B indicates runs with CV = 0.2
+  if (icase %in% grep("A_II_Fp4", cases, value = TRUE)) {
     # for baseline, want to use init F
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat, 
       use_initF = TRUE, dir.template = dir.template_current, agelen = agelen, 
-      cwe = cwe, M_val = 0.05) # based on what we were told the setting in the IBM was...
+      cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1)) # based on what we were told the setting in the IBM was...
   }
-  if (icase %in% grep("OneWayTrip", cases, value = TRUE)) {
+  if (icase %in% grep("B_II_Fp4", cases, value = TRUE)) {
+    # for baseline, want to use init F
+    build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat, 
+      use_initF = TRUE, dir.template = dir.template_current, agelen = agelen, 
+      cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2)) # based on what we were told the setting in the IBM was...
+  }
+  if (icase %in% grep("A_II_1WayTrip", cases, value = TRUE)) {
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
                  use_initF = FALSE, dir.template = dir.template_current, 
                  agelen = agelen, 
-                 cwe = cwe, M_val = 0.15) #base on what we were told the setting in the IBM was
+                 cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1)) #base on what we were told the setting in the IBM was
   }
-  
+  if (icase %in% grep("B_II_1WayTrip", cases, value = TRUE)) {
+    build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
+                 use_initF = FALSE, dir.template = dir.template_current, 
+                 agelen = agelen, 
+                 cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2)) #base on what we were told the setting in the IBM was
+  }
   dirs1 <- file.path(mydir_today_plat,
                      paste0('run',
                             substring(1000 + seq_len(n), 2)))

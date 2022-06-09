@@ -169,7 +169,8 @@ build_models <- function(runs = 1:2, # change default for now to avoid running t
                          use_initF = FALSE,
                          updatedat = FALSE,
                          overwrite = TRUE,
-                         M_val  = 0.05, # default
+                         M_val  = 0.1, # default
+                         CV_vals = c(0.1, 0.1),
                          dir, agelen, cwe){
   for(irun in runs){
 
@@ -202,6 +203,8 @@ build_models <- function(runs = 1:2, # change default for now to avoid running t
                                 "InitF_seas_2_flt_1fishery")
     }
     ctl$MG_parms["NatM_p_1_Fem_GP_1", "INIT" ] <- M_val
+    ctl$MG_parms["CV_young_Fem_GP_1", INIT] <- CV_vals[1]
+    ctl$MG_parms["CV_old_Fem_GP_1", INIT]   <- CV_vals[2]
     r4ss::SS_writectl(ctl, file.path(newdir, "platoons_control.ss"),
                        overwrite = TRUE)
 
@@ -228,7 +231,7 @@ remove_platoons <- function(dir){
   SS_writestarter(start, dir = dir, overwrite = TRUE)
   # change control file to convert these lines:
   ## 5 #_N_platoons_Within_GrowthPattern
-  ## 1 #_Platoon_between/within_stdev_ratio (no read if N_platoons=1)
+  ## 0.4 #_Platoon_between/within_stdev_ratio (no read if N_platoons=1)
   ## 0.031 0.237 0.464 0.237 0.031 #vector_platoon_dist_(-1_in_first_val_gives_normal_approx)
   # into this line:
   ## 1 #_N_platoons_Within_GrowthPattern
