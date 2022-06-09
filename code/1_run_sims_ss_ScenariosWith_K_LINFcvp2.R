@@ -30,7 +30,7 @@ dir.create(outer_folder_output)
 
 # setup for run ----
 for (icase in cases) {
-  mydir.dat <- file.path(outer_folder, icase, "IBMData")
+  mydir.dat <- file.path(outer_folder, icase)
   dir.create(file.path(outer_folder_output, icase))
   mydir_today_plat <- file.path(outer_folder_output, icase, paste0("runs_plats_", run_date))
   mydir_today_no_plat <- file.path(outer_folder_output, icase, paste0("runs_no_plats_", run_date))

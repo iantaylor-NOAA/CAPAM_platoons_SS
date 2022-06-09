@@ -20,7 +20,7 @@ Rdata_folder <- file.path("Rdata_output", basename(outer_folder))
 # read in csv files ----
 
 csv_list <- lapply(cases, function(icase, outer_folder) {
-  mydir.dat <- file.path(outer_folder, icase, "IBMData")
+  mydir.dat <- file.path(outer_folder, icase)
   out_ab <- file.path(mydir.dat, '../ResultsSSab')
   out_pl <- file.path(mydir.dat, '../ResultsSSpl')
   partable_plat <- read.csv(file.path(out_pl, "SS_parameters.csv"))
@@ -242,6 +242,6 @@ ggplot(recruits_df_long, aes(x = Yr, y = recruits)) +
 # read in true values.
 true_vals <- lapply(cases,
        function(x) {
-         readLines(file.path(outer_folder, x, "IBMData", "True_IBM_Values.TRU"))
+         readLines(file.path(outer_folder, x, "True_IBM_Values.TRU"))
        })
 

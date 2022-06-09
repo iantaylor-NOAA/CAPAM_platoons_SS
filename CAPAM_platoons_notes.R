@@ -348,13 +348,8 @@ if(FALSE){
 
   for (icase in 1:4) {
     mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
-                           cases[icase],
-                           'IBMData')
-    ## mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
-    ##                        'Baseline_KnifeEdge40cm_Fp4_Mp05/IBMData')
-    ## mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
-    ##                        'OneWayTrip_FRising10YrsFr0top25_Mp15/IBMData')
-    
+                           cases[icase]
+                           )
     mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_4Dec')
     mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_4Dec')
     dir.template_current <- file.path(mydir, 'CAPAM_platoons_template_current')
@@ -419,8 +414,7 @@ if(FALSE){
   for (icase in 4) {
     n <- 100
     mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
-                           cases[icase],
-                           'IBMData')
+                           cases[icase])
     mydir.today1 <- file.path(mydir.dat, 'runs_with_platoons_4Dec')
     mydir.today2 <- file.path(mydir.dat, 'runs_no_platoons_4Dec')
 
@@ -460,8 +454,7 @@ if(FALSE){
   for (icase in 1:4) {
     n <- 100
     mydir.dat <- file.path(mydir, 'IBM_data_28Oct2020',
-                           cases[icase],
-                           'IBMData')
+                           cases[icase])
     out_ab <- file.path(mydir.dat, '../ResultsSSab')
     out_pl <- file.path(mydir.dat, '../ResultsSSpl')
 

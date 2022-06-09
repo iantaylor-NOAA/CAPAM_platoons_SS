@@ -203,8 +203,8 @@ build_models <- function(runs = 1:2, # change default for now to avoid running t
                                 "InitF_seas_2_flt_1fishery")
     }
     ctl$MG_parms["NatM_p_1_Fem_GP_1", "INIT" ] <- M_val
-    ctl$MG_parms["CV_young_Fem_GP_1", INIT] <- CV_vals[1]
-    ctl$MG_parms["CV_old_Fem_GP_1", INIT]   <- CV_vals[2]
+    ctl$MG_parms["CV_young_Fem_GP_1", "INIT"] <- CV_vals[1]
+    ctl$MG_parms["CV_old_Fem_GP_1", "INIT"]   <- CV_vals[2]
     r4ss::SS_writectl(ctl, file.path(newdir, "platoons_control.ss"),
                        overwrite = TRUE)
 

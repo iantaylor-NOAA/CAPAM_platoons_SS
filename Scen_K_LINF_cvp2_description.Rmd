@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r }
 # fixed values ----
 mydir <- getwd()
-outer_folder <- file.path(mydir, "Scen_K_LINFcvp2")
+outer_folder <- file.path(mydir, "Scenarios")
 outer_folder_output <- file.path(mydir, "output", basename(outer_folder))
 cases <- list.dirs(outer_folder_output, full.names = FALSE, recursive = FALSE)
 run_date <-  "2021_06_24"
@@ -50,7 +50,7 @@ Read in the csv files generated from the runs, and add as components of a list o
 ```{r}
 # read in csv files ----
 csv_list <- lapply(cases, function(icase, outer_folder) {
-  mydir.dat <- file.path(outer_folder, icase, "IBMData")
+  mydir.dat <- file.path(outer_folder, icase)
   out_ab <- file.path(mydir.dat, '../ResultsSSab')
   out_pl <- file.path(mydir.dat, '../ResultsSSpl')
   partable_plat <- read.csv(file.path(out_pl, "SS_parameters.csv"))

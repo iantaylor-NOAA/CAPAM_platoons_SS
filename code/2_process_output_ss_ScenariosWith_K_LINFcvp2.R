@@ -21,7 +21,7 @@ Rdata_folder <- file.path("Rdata_output", basename(outer_folder))
 
 # load saved output, create csvs ----
 for(icase in cases) {
-  mydir.dat <- file.path(outer_folder, icase, "IBMData")
+  mydir.dat <- file.path(outer_folder, icase)
   out_ab <- file.path(mydir.dat, '../ResultsSSab')
   out_pl <- file.path(mydir.dat, '../ResultsSSpl')
   load(file.path(Rdata_folder, paste0('case', icase,'_stuff_', run_date, ".Rdata")))
