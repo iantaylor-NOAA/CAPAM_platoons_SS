@@ -1,6 +1,9 @@
 # profile over Platoon_within/between_stdev_ratio (no read if N_platoons=1)
 # RM realized this can make a big difference, so may wan to set it differently for each scenario?
 
+# Why is q fixed? where does this value come from? is it assumed, or was it calculated from the IBM true values?
+# 
+
 # take 1 of each model for the scenarios and profile over a range of platoon_within/between values to see how it affect NLL and 
 
 # load packages, set options ----
@@ -85,6 +88,20 @@ for (icase in cases) {
                       extras = "-nox", model = ss_name, exe_in_path = TRUE,
                       intern = TRUE)
 }
+
+# see which failed
+test <- lapply(cases, function(icase) {
+  mydir_today_plat <- file.path(outer_folder_output, icase, paste0("runs_plats_", run_date))
+  file.exists(file.path(mydir_today_plat, "CAPAM_platoons_run001", "control.ss_new"))
+})
+
+# see max gradients
+max_grad <- lapply(cases, function(icase) {
+  mydir_today_plat <- file.path(outer_folder_output, icase, paste0("runs_plats_", run_date))
+  tmp <- readLines(file.path(mydir_today_plat, "CAPAM_platoons_run001", "ss.par"))
+  tmp[1]
+})
+
 
 # Run profile for each of the 4 scenarios ----
 
