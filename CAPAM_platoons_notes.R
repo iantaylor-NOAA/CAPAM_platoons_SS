@@ -47,11 +47,11 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
         months <- 7:12
         month <- 9
       }
-      catch.value <- sum(cwe.i$CAWT[cwe.i$YR == y & cwe.i$MONTH %in% months])
+      catch.value <- sum(cwe.i$CAWT[cwe.i$YR == y & cwe.i$Tstep %in% months])
       datfile$catch$catch[datfile$catch$year == y &
                           datfile$catch$seas == s] <- catch.value
 
-      effort.value <- sum(cwe.i$EFFORT_W[cwe.i$YR == y & cwe.i$MONTH %in% months])
+      effort.value <- sum(cwe.i$EFFORT_W[cwe.i$YR == y & cwe.i$Tstep %in% months])
       cpue.value <- catch.value / effort.value
       newrow.cpue <- data.frame(year = y,
                                 seas = month,
