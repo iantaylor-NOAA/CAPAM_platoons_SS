@@ -92,7 +92,7 @@
 #_          LO            HI          INIT         PRIOR         PR_SD       PR_type      PHASE    env-var    use_dev   dev_mnyr   dev_mxyr     dev_PH      Block    Blk_Fxn #  parm_name
              5            15            10            10             5             0          1          0          0          0          0          0          0          0 # SR_LN(R0)
            0.2             1           1.0           0.6          0.01             0         -5          0          0          0          0          0          0          0 # SR_BH_steep
-             0             2           0.5           0.5           0.8             0         -3          0          0          0          0          0          0          0 # SR_sigmaR
+             0             2           0.7           0.5           0.8             0         -3          0          0          0          0          0          0          0 # SR_sigmaR
             -5             5             0             0             1             0         -5          0          0          0          0          0          0          0 # SR_regime
              0             2             0             1            50             0        -50          0          0          0          0          0          0          0 # SR_autocorr
 #_no timevary SR parameters
@@ -205,7 +205,7 @@
 #_          LO            HI          INIT         PRIOR         PR_SD       PR_type      PHASE    env-var    use_dev   dev_mnyr   dev_mxyr     dev_PH      Block    Blk_Fxn  #  parm_name
 # 1   fishery LenSelex
             20            60          40            40          0.01             0          2          0          0          0          0          0          0          0  #  Size_inflection_FISHERY(1)
-          0.01            10          1             1           0.01             0          3          0          0          0          0          0          0          0  #  Size_95%width_FISHERY(1)
+          0.75            10          2             1           0.01             0          3          0          0          0          0          0          0          0  #  Size_95%width_FISHERY(1)
 # 1   fishery AgeSelex
 #_no timevary selex parameters
 #
