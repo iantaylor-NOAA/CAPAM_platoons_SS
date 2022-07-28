@@ -27,7 +27,7 @@ outer_folder <- file.path(mydir, "Scenarios")
 cases <- list.dirs(outer_folder, full.names = FALSE, recursive = FALSE)
 
 ss_name <- "ss_3.30.19.01.exe" # this is in each model folder or in the path.
-run_date <- "2022_06_03"
+run_date <- "2022_07_07"
 
 dir.create("output_profile")
 outer_folder_output <- file.path("output_profile", basename(outer_folder))
@@ -54,25 +54,25 @@ for (icase in cases) {
   
   dir.create(mydir_today_plat)
 
-  if (icase %in% grep("A_II_Fp4", cases, value = TRUE)) {
+  if (icase %in% grep("A_IIa_Fp4", cases, value = TRUE)) {
     # for baseline, want to use init F
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat, 
       use_initF = TRUE, dir.template = dir.template_current, agelen = agelen, 
       cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1)) # based on what we were told the setting in the IBM was...
   }
-  if (icase %in% grep("B_II_Fp4", cases, value = TRUE)) {
+  if (icase %in% grep("B_IIa_Fp4", cases, value = TRUE)) {
     # for baseline, want to use init F
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat, 
       use_initF = TRUE, dir.template = dir.template_current, agelen = agelen, 
       cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2)) # based on what we were told the setting in the IBM was...
   }
-  if (icase %in% grep("A_II_1WayTrip", cases, value = TRUE)) {
+  if (icase %in% grep("A_IIa_1WayTrip", cases, value = TRUE)) {
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
                  use_initF = FALSE, dir.template = dir.template_current, 
                  agelen = agelen, 
                  cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1)) #base on what we were told the setting in the IBM was
   }
-  if (icase %in% grep("B_II_1WayTrip", cases, value = TRUE)) {
+  if (icase %in% grep("B_IIa_1WayTrip", cases, value = TRUE)) {
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
                  use_initF = FALSE, dir.template = dir.template_current, 
                  agelen = agelen, 
