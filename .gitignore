@@ -19,6 +19,7 @@
 
 # RStudio files
 .Rproj.user/
+*.Rproj
 
 # produced vignettes
 vignettes/*.html
@@ -44,6 +45,8 @@ output
 IBM_data*
 2022_June_27_convergence*
 2022_June_6_IBM data*
+Scenarios/*/Results*
+console.output.txt
 
 # Rdata files
 *.Rdata
