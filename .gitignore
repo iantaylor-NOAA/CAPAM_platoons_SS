@@ -42,9 +42,14 @@ vignettes/*.pdf
 runs*
 output
 IBM_data*
+2022_June_27_convergence*
+2022_June_6_IBM data*
 
 # Rdata files
 *.Rdata
 
 # Word docs
 *.docx
+
+# other stuff
+*.zip
