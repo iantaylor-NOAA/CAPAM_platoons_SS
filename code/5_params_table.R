@@ -10,26 +10,29 @@ library(dplyr)
 # F one (for baseline) and no init F params for one way trip.
 dat <- SS_readdat(file.path("CAPAM_platoons_template_current", "platoon_data_template.ss"))
 ctl <- SS_readctl(file.path("CAPAM_platoons_template_current", "platoons_control.ss"),
-                  use_datlist = TRUE, datlist = dat)
+  use_datlist = TRUE, datlist = dat
+)
 
 # Pull together a table of the params -----
 
 get_params <- function(table_name, ctl_file = ctl) {
-    if(is.null(ctl_file[[table_name]])) {
-        return(NULL)
-    }
-    tmp_tbl <- ctl_file[[table_name]][, c("INIT", "PHASE"), drop = FALSE]
-    tmp_tbl$name <- row.names(tmp_tbl)
-    row.names(tmp_tbl) <- NULL
-    tmp_tbl$estimated_or_fixed <- ifelse(tmp_tbl$PHASE > 0, "estimated", "fixed")
-    tmp_tbl$init <- tmp_tbl$INIT
-    tmp_tbl <- tmp_tbl[, c("name", "estimated_or_fixed", "init"), drop = FALSE]
-    tmp_tbl
+  if (is.null(ctl_file[[table_name]])) {
+    return(NULL)
+  }
+  tmp_tbl <- ctl_file[[table_name]][, c("INIT", "PHASE"), drop = FALSE]
+  tmp_tbl$name <- row.names(tmp_tbl)
+  row.names(tmp_tbl) <- NULL
+  tmp_tbl$estimated_or_fixed <- ifelse(tmp_tbl$PHASE > 0, "estimated", "fixed")
+  tmp_tbl$init <- tmp_tbl$INIT
+  tmp_tbl <- tmp_tbl[, c("name", "estimated_or_fixed", "init"), drop = FALSE]
+  tmp_tbl
 }
 
 
-tbl_names <- c("MG_parms", "SR_parms", "Q_parms", "size_selex_parms",
- "age_selex_parms")
+tbl_names <- c(
+  "MG_parms", "SR_parms", "Q_parms", "size_selex_parms",
+  "age_selex_parms"
+)
 
 tbl <- lapply(tbl_names, get_params)
 tbl <- do.call(rbind, tbl)
@@ -65,4 +68,3 @@ knitr::kable(tbl, format = "markdown")
 # |LnQ_base_fishery(1)       |fixed              |  -6.9798000|
 # |SizeSel_P_1_fishery(1)    |estimated          |  40.0000000|
 # |SizeSel_P_2_fishery(1)    |estimated          |   1.0000000|
-
