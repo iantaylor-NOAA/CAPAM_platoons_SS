@@ -4,7 +4,7 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
                     use_initF = FALSE,
                     verbose = TRUE, yrs){
   # read dummy data file
-  datfile <- SS_readdat(file.path(dir.template,
+  datfile <- r4ss::SS_readdat(file.path(dir.template,
                                   'platoon_data_template.ss'),
                         version = 3.30,
                         verbose = FALSE)
@@ -74,7 +74,7 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
       # define month ranges
       if(s == 1){
         months <- 1:6
-        month <- 4
+        month <- 4 
       }
       if(s == 2){
         months <- 7:12
@@ -155,10 +155,12 @@ makedat <- function(irun, agelen.i, cwe.i, dir.i,
     } # end loop over seasons
   } # end loop over years
 
+  # turn off mean size at age data to deal with nan issue
+  SatA$Yr[SatA$Yr != 9999] <- -1 * abs(as.numeric(SatA$Yr[SatA$Yr != 9999]))
   # restore mean size at age data frame to list object
   datfile$MeanSize_at_Age_obs <- SatA
 
-  SS_writedat(datfile, file.path(dir.i, 'platoons_data.ss'),
+  r4ss::SS_writedat(datfile, file.path(dir.i, 'platoons_data.ss'),
               overwrite = overwrite)
 }
 
@@ -171,7 +173,11 @@ build_models <- function(runs = 1:2, # change default for now to avoid running t
                          overwrite = TRUE,
                          M_val  = 0.1, # default
                          CV_vals = c(0.1, 0.1),
-                         dir, agelen, cwe){
+                         sel_vals = c(39.5, 1),
+                         sel_phase = c(-2, -3),
+                         dir, 
+                         agelen, 
+                         cwe){
   for(irun in runs){
 
     # copy all non-data files
@@ -183,28 +189,35 @@ build_models <- function(runs = 1:2, # change default for now to avoid running t
       dir.create(newdir)
     }
     
-    file.copy(file.path(dir.template, 'starter.ss'),
-              file.path(newdir, 'starter.ss'), overwrite = overwrite)
-    file.copy(file.path(dir.template, 'forecast.ss'),
-              file.path(newdir, 'forecast.ss'), overwrite = overwrite)
-    file.copy(file.path(dir.template, 'platoons_control.ss'),
-              file.path(newdir, 'platoons_control.ss'), overwrite = overwrite)
-    file.copy(file.path(dir.template, 'ss.exe'),
-              file.path(newdir, 'ss.exe'), overwrite = overwrite)
-# change control file ----
-      # add to the ctl file changes
-      dat <- r4ss::SS_readdat(file.path(dir.template, "platoon_data_template.ss"))
-      ctl <- r4ss::SS_readctl(file.path(newdir, "platoons_control.ss"),
-       use_datlist = TRUE, datlist = dat)
-    if(use_initF) {
-      ctl$init_F <- data.frame(LO = c(0.01, 0.01), HI = 0.8, INIT = 0.4, PRIOR = 0.1, 
-                               PR_SD = 99, PR_type = 0, PHASE = 2, PType = 18)
-      rownames(ctl$init_F) <- c("InitF_seas_1_flt_1fishery",
-                                "InitF_seas_2_flt_1fishery")
+    r4ss::copy_SS_inputs(dir.old = dir.template, 
+      dir.new = newdir,
+      overwrite = TRUE)
+    
+    # change control file ----
+    # read files
+    dat <- r4ss::SS_readdat(file.path(dir.template, "platoon_data_template.ss"))
+    ctl <- r4ss::SS_readctl(file.path(newdir, "platoons_control.ss"),
+      use_datlist = TRUE, datlist = dat
+    )
+    # add initF parameters if requested
+    if (use_initF) {
+      ctl$init_F <- data.frame(
+        LO = c(0.01, 0.01), HI = 0.8, INIT = 0.4, PRIOR = 0.1,
+        PR_SD = 99, PR_type = 0, PHASE = 2, PType = 18
+      )
+      rownames(ctl$init_F) <- c(
+        "InitF_seas_1_flt_1fishery",
+        "InitF_seas_2_flt_1fishery"
+      )
     }
+    # modify M and growth CV
     ctl$MG_parms["NatM_p_1_Fem_GP_1", "INIT" ] <- M_val
     ctl$MG_parms["CV_young_Fem_GP_1", "INIT"] <- CV_vals[1]
     ctl$MG_parms["CV_old_Fem_GP_1", "INIT"]   <- CV_vals[2]
+    # modify selectivity
+    ctl$size_selex_parms$INIT <- sel_vals
+    ctl$size_selex_parms$PHASE <- sel_phase
+    # write control file
     r4ss::SS_writectl(ctl, file.path(newdir, "platoons_control.ss"),
                        overwrite = TRUE)
 
@@ -226,9 +239,9 @@ build_models <- function(runs = 1:2, # change default for now to avoid running t
 
 remove_platoons <- function(dir){
   # change starter file to point to different control file
-  start <- SS_readstarter(file.path(dir, 'starter.ss'))
+  start <- r4ss::SS_readstarter(file.path(dir, 'starter.ss'))
   start$ctlfile <- "no_platoons_control.ss"
-  SS_writestarter(start, dir = dir, overwrite = TRUE)
+  r4ss::SS_writestarter(start, dir = dir, overwrite = TRUE)
   # change control file to convert these lines:
   ## 5 #_N_platoons_Within_GrowthPattern
   ## 0.4 #_Platoon_between/within_stdev_ratio (no read if N_platoons=1)
@@ -306,7 +319,7 @@ get30plus <- function(mod, min = 30){
                        paste(bins)])
   }
   # weight for 30+cm fish
-  wt30plus <- mod$biology$Wt_len[mod$biology$Low %in% bins]
+  wt30plus <- mod$biology$Wt_F[mod$biology$Len_lo %in% bins]
   N30plus <- apply(natlen.mat, MARGIN = 1, FUN = sum)
   B30plus <- natlen.mat %*% wt30plus
   data.frame(Yr, N30plus = N30plus, B30plus = B30plus)
