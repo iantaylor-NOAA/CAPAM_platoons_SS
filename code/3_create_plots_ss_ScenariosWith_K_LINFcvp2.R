@@ -13,7 +13,7 @@ mydir <- getwd()
 outer_folder <- file.path(mydir, "Scenarios")
 outer_folder_output <- file.path(mydir, "output", basename(outer_folder))
 cases <- list.dirs(outer_folder_output, full.names = FALSE, recursive = FALSE)
-run_date <-  "2021_06_24"
+run_date <-  "2022_10_04"
 
 Rdata_folder <- file.path("Rdata_output", basename(outer_folder))
 
@@ -239,9 +239,11 @@ ggplot(recruits_df_long, aes(x = Yr, y = recruits)) +
   theme_classic()
 
 # TODO: make some RE plots ----
-# read in true values.
+# read in true values (skipped 7 lines include parameter values).
 true_vals <- lapply(cases,
        function(x) {
-         readLines(file.path(outer_folder, x, "True_IBM_Values.TRU"))
+         read.table(file.path(outer_folder, x, "True_IBM_Values.TRU"), 
+         skip = 7, header = TRUE)
        })
 
+matplot(true_vals[[1]]$iyear, true_vals[[1]]$StartYrBgt30)

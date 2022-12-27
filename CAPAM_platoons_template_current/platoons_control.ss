@@ -96,10 +96,10 @@
             -5             5             0             0             1             0         -5          0          0          0          0          0          0          0 # SR_regime
              0             2             0             1            50             0        -50          0          0          0          0          0          0          0 # SR_autocorr
 #_no timevary SR parameters
-1 #do_recdev:  0=none; 1=devvector (R=F(SSB)+dev); 2=deviations (R=F(SSB)+dev); 3=deviations (R=R0*dev; dev2=R-f(SSB)); 4=like 3 with sum(dev2) adding penalty
+2 #do_recdev:  0=none; 1=devvector (R=F(SSB)+dev); 2=deviations (R=F(SSB)+dev); 3=deviations (R=R0*dev; dev2=R-f(SSB)); 4=like 3 with sum(dev2) adding penalty
 1985# first year of main recr_devs; early devs can preceed this era
 2019 # last year of main recr_devs; forecast devs start in following year
-4 #_recdev phase
+2 #_recdev phase
 1 # (0/1) to read 13 advanced options
  0 #_recdev_early_start (0=none; neg value makes relative to recdev_start)
  -4 #_recdev_early_phase
@@ -111,8 +111,8 @@
 2016.2   #_first_recent_yr_nobias_adj_in_MPD 
 0.9497   #_max_bias_adj_in_MPD (1.0 to mimic pre-2009 models)   
  0 #_period of cycles in recruitment (N parms read below)
- -8 #min rec_dev
- 8 #max rec_dev
+ -4 #min rec_dev
+ 4 #max rec_dev
  0 #_read_recdevs
 #_end of advanced SR options
 #
@@ -204,8 +204,8 @@
 #
 #_          LO            HI          INIT         PRIOR         PR_SD       PR_type      PHASE    env-var    use_dev   dev_mnyr   dev_mxyr     dev_PH      Block    Blk_Fxn  #  parm_name
 # 1   fishery LenSelex
-            20            60          40            40          0.01             0          2          0          0          0          0          0          0          0  #  Size_inflection_FISHERY(1)
-          0.75            10          2             1           0.01             0          3          0          0          0          0          0          0          0  #  Size_95%width_FISHERY(1)
+            20            60          39.5          40          0.01             0         -2          0          0          0          0          0          0          0  #  Size_inflection_FISHERY(1)
+          0.75            10          1             1           0.01             0         -3          0          0          0          0          0          0          0  #  Size_95%width_FISHERY(1)
 # 1   fishery AgeSelex
 #_no timevary selex parameters
 #
