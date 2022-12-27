@@ -15,7 +15,6 @@ outer_folder <- file.path(mydir, "Scenarios")
 # note: expecting there to be 4 cases.
 cases <- list.dirs(outer_folder, full.names = FALSE, recursive = FALSE)
 
-#ss_name <- "ss_3.30.19.01.exe" # this is in each model folder or in the path.
 run_date <- format(Sys.Date(), "%Y_%m_%d")
 
 Rdata_output_folder <- file.path("Rdata_output", basename(outer_folder))
@@ -40,7 +39,20 @@ for (icase in cases) {
                     skip = 1, header = TRUE)
   true <- read.table(file.path(mydir.dat, 'True_IBM_Values.TRU'),
                      skip = 7, header = TRUE)
-  
+  # set up selectivity based on case name
+  sel_vals <- NULL
+  if (grepl("L9541", icase)) {
+    sel_vals = c(39.5, 1.0)
+    sel_phase = c(-2, -3)
+  }
+  if (grepl("L9545", icase)) {
+    sel_vals = c(39.5, 5.0)
+    sel_phase = c(2, 3)
+  }
+  if (is.null(sel_vals)) {
+    stop("problem with sel_vals")
+  }
+
   dir.create(mydir_today_plat, showWarnings = FALSE)
   dir.create(mydir_today_no_plat, showWarnings = FALSE)
   # note that A indicates runs with CV = 0.1, while B indicates runs with CV = 0.2
@@ -49,28 +61,37 @@ for (icase in cases) {
     # for baseline, want to use init F
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat, 
       use_initF = TRUE, dir.template = dir.template_current, agelen = agelen, 
-      cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1)) # based on what we were told the setting in the IBM was...
+      cwe = cwe, 
+      M_val = 0.1, CV_vals = c(0.1, 0.1), # based on what we were told the setting in the IBM was...
+                 sel_vals = sel_vals, sel_phase = sel_phase
+      ) 
   }
   if (icase %in% grep("B_IIa_Fp4", cases, value = TRUE)) {
     message("\nBuilding ", icase)
     # for baseline, want to use init F
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat, 
       use_initF = TRUE, dir.template = dir.template_current, agelen = agelen, 
-      cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2)) # based on what we were told the setting in the IBM was...
+      cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2), # based on what we were told the setting in the IBM was...
+                 sel_vals = sel_vals, sel_phase = sel_phase
+      )
   }
   if (icase %in% grep("A_IIa_1WayTrip", cases, value = TRUE)) {
     message("\nBuiling ", icase)
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
                  use_initF = FALSE, dir.template = dir.template_current, 
                  agelen = agelen, 
-                 cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1)) #base on what we were told the setting in the IBM was
+                 cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1), #base on what we were told the setting in the IBM was
+                 sel_vals = sel_vals, sel_phase = sel_phase
+                )
   }
   if (icase %in% grep("B_IIa_1WayTrip", cases, value = TRUE)) {
     message("\nBuiling ", icase)
     build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
                  use_initF = FALSE, dir.template = dir.template_current, 
                  agelen = agelen, 
-                 cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2)) #base on what we were told the setting in the IBM was
+                 cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2), #base on what we were told the setting in the IBM was
+                 sel_vals = sel_vals, sel_phase = sel_phase
+                 ) 
   }
   dirs1 <- file.path(mydir_today_plat,
                      paste0('run',
@@ -95,6 +116,7 @@ for (icase in cases) {
   mydir_today_no_plat <- file.path(outer_folder_output, icase, paste0("runs_no_plats_", run_date))
   # run platoons model
   dirs <- dir(mydir_today_plat, full.names = TRUE)[seq_len(n)]
+  # assuming that current SS3 executable is in path with name "ss_win.exe"
   for (dir in dirs) {
     r4ss::run(dir = dir, exe = "ss_win", skipfinished = TRUE)
   }
