@@ -1,5 +1,5 @@
 # load packages, set options ----
-#library(r4ss)
+# library(r4ss)
 
 mydir <- getwd()
 source(file.path("code", "SS_run_functions.R"))
@@ -31,23 +31,26 @@ for (icase in cases) {
   dir.create(file.path(outer_folder_output, icase), showWarnings = FALSE)
   mydir_today_plat <- file.path(outer_folder_output, icase, paste0("runs_plats_", run_date))
   mydir_today_no_plat <- file.path(outer_folder_output, icase, paste0("runs_no_plats_", run_date))
-  dir.template_current <- file.path('CAPAM_platoons_template_current')
+  dir.template_current <- file.path("CAPAM_platoons_template_current")
   # read the OM files (output from IBM)
-  agelen <- read.table(file.path(mydir.dat, 'AGE-LENGTH41.OUT'),
-                       skip = 2, header = TRUE)
-  cwe <- read.table(file.path(mydir.dat, 'CwEByMonth.OUT'),
-                    skip = 1, header = TRUE)
-  true <- read.table(file.path(mydir.dat, 'True_IBM_Values.TRU'),
-                     skip = 7, header = TRUE)
+  agelen <- read.table(file.path(mydir.dat, "AGE-LENGTH41.OUT"),
+    skip = 2, header = TRUE
+  )
+  cwe <- read.table(file.path(mydir.dat, "CwEByMonth.OUT"),
+    skip = 1, header = TRUE
+  )
+  true <- read.table(file.path(mydir.dat, "True_IBM_Values.TRU"),
+    skip = 7, header = TRUE
+  )
   # set up selectivity based on case name
   sel_vals <- NULL
   if (grepl("L9541", icase)) {
-    sel_vals = c(39.5, 1.0)
-    sel_phase = c(-2, -3)
+    sel_vals <- c(39.5, 1.0)
+    sel_phase <- c(-2, -3)
   }
   if (grepl("L9545", icase)) {
-    sel_vals = c(39.5, 5.0)
-    sel_phase = c(2, 3)
+    sel_vals <- c(39.5, 5.0)
+    sel_phase <- c(2, 3)
   }
   if (is.null(sel_vals)) {
     stop("problem with sel_vals")
@@ -59,59 +62,69 @@ for (icase in cases) {
   if (icase %in% grep("A_IIa_Fp4", cases, value = TRUE)) {
     message("\nBuilding ", icase)
     # for baseline, want to use init F
-    build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat, 
-      use_initF = TRUE, dir.template = dir.template_current, agelen = agelen, 
-      cwe = cwe, 
+    build_models(
+      run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
+      use_initF = TRUE, dir.template = dir.template_current, agelen = agelen,
+      cwe = cwe,
       M_val = 0.1, CV_vals = c(0.1, 0.1), # based on what we were told the setting in the IBM was...
-                 sel_vals = sel_vals, sel_phase = sel_phase
-      ) 
+      sel_vals = sel_vals, sel_phase = sel_phase
+    )
   }
   if (icase %in% grep("B_IIa_Fp4", cases, value = TRUE)) {
     message("\nBuilding ", icase)
     # for baseline, want to use init F
-    build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat, 
-      use_initF = TRUE, dir.template = dir.template_current, agelen = agelen, 
+    build_models(
+      run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
+      use_initF = TRUE, dir.template = dir.template_current, agelen = agelen,
       cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2), # based on what we were told the setting in the IBM was...
-                 sel_vals = sel_vals, sel_phase = sel_phase
-      )
+      sel_vals = sel_vals, sel_phase = sel_phase
+    )
   }
   if (icase %in% grep("A_IIa_1WayTrip", cases, value = TRUE)) {
     message("\nBuiling ", icase)
-    build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
-                 use_initF = FALSE, dir.template = dir.template_current, 
-                 agelen = agelen, 
-                 cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1), #base on what we were told the setting in the IBM was
-                 sel_vals = sel_vals, sel_phase = sel_phase
-                )
+    build_models(
+      run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
+      use_initF = FALSE, dir.template = dir.template_current,
+      agelen = agelen,
+      cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1), # base on what we were told the setting in the IBM was
+      sel_vals = sel_vals, sel_phase = sel_phase
+    )
   }
   if (icase %in% grep("B_IIa_1WayTrip", cases, value = TRUE)) {
     message("\nBuiling ", icase)
-    build_models(run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
-                 use_initF = FALSE, dir.template = dir.template_current, 
-                 agelen = agelen, 
-                 cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2), #base on what we were told the setting in the IBM was
-                 sel_vals = sel_vals, sel_phase = sel_phase
-                 ) 
+    build_models(
+      run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
+      use_initF = FALSE, dir.template = dir.template_current,
+      agelen = agelen,
+      cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2), # base on what we were told the setting in the IBM was
+      sel_vals = sel_vals, sel_phase = sel_phase
+    )
   }
-  dirs1 <- file.path(mydir_today_plat,
-                     paste0('run',
-                            substring(1000 + seq_len(n), 2)))
+  dirs1 <- file.path(
+    mydir_today_plat,
+    paste0(
+      "run",
+      substring(1000 + seq_len(n), 2)
+    )
+  )
   # copy platoons directories to no-platoons directories,then remove
   # platoons
-  r4ss::populate_multiple_folders(outerdir.old = mydir_today_plat,
-                                  outerdir.new = mydir_today_no_plat,
-                                  create.dir = TRUE, 
-                                  overwrite = TRUE,
-                                  use_ss_new = FALSE,
-                                  verbose = TRUE)
+  r4ss::populate_multiple_folders(
+    outerdir.old = mydir_today_plat,
+    outerdir.new = mydir_today_no_plat,
+    create.dir = TRUE,
+    overwrite = TRUE,
+    use_ss_new = FALSE,
+    verbose = TRUE
+  )
   dirs2 <- dir(mydir_today_no_plat, full.names = TRUE)
-  for(idir in dirs2){
+  for (idir in dirs2) {
     remove_platoons(idir)
   }
 } # end loop over cases to build models
 
 # loop over cases to run models
-for (icase in cases) { 
+for (icase in cases) {
   mydir_today_plat <- file.path(outer_folder_output, icase, paste0("runs_plats_", run_date))
   mydir_today_no_plat <- file.path(outer_folder_output, icase, paste0("runs_no_plats_", run_date))
   # run platoons model
@@ -123,18 +136,22 @@ for (icase in cases) {
   # run no-platoons model
   dirs <- dir(mydir_today_no_plat, full.names = TRUE)[seq_len(n)]
   for (dir in dirs) {
-    r4ss::run(dir = dir, exe = "ss_win", skipfinished = TRUE) #FALSE
+    r4ss::run(dir = dir, exe = "ss_win", skipfinished = TRUE) # FALSE
   }
   # summarize output from both models----
   # get the output and summarize it (1 is with platoons, 2 is without)
-  modlist_plat <- tryCatch(r4ss::SSgetoutput(dirvec = dir(mydir_today_plat, full.names = TRUE)[seq_len(n)],
-                          getcovar = FALSE), error = function (e) print(e))
-  modsum1 <- tryCatch(r4ss::SSsummarize(modlist_plat), error = function (e) print(e))
-  
-  modlist_no_plat <- tryCatch(r4ss::SSgetoutput(dirvec = dir(mydir_today_no_plat, full.names = TRUE)[seq_len(n)],
-                          getcovar = FALSE), error = function (e) print(e))
-  modsum2 <- tryCatch(r4ss::SSsummarize(modlist_no_plat), error = function (e) print(e))
-  save(modlist_plat, modlist_no_plat, modsum1, modsum2,
-       file = file.path(file.path(mydir, Rdata_output_folder, paste0('case', icase, '_stuff_', run_date, '.Rdata'))))
-}
+  modlist_plat <- tryCatch(r4ss::SSgetoutput(
+    dirvec = dir(mydir_today_plat, full.names = TRUE)[seq_len(n)],
+    getcovar = FALSE
+  ), error = function(e) print(e))
+  modsum1 <- tryCatch(r4ss::SSsummarize(modlist_plat), error = function(e) print(e))
 
+  modlist_no_plat <- tryCatch(r4ss::SSgetoutput(
+    dirvec = dir(mydir_today_no_plat, full.names = TRUE)[seq_len(n)],
+    getcovar = FALSE
+  ), error = function(e) print(e))
+  modsum2 <- tryCatch(r4ss::SSsummarize(modlist_no_plat), error = function(e) print(e))
+  save(modlist_plat, modlist_no_plat, modsum1, modsum2,
+    file = file.path(file.path(mydir, Rdata_output_folder, paste0("case", icase, "_stuff_", run_date, ".Rdata")))
+  )
+}
