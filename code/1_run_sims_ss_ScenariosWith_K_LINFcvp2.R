@@ -25,7 +25,8 @@ dir.create("output", showWarnings = FALSE)
 outer_folder_output <- file.path("output", basename(outer_folder))
 dir.create(outer_folder_output, showWarnings = FALSE)
 
-# setup for run ----
+# setup for run (build models) ----
+# NOTE: this step takes about 40 minutes
 for (icase in cases) {
   mydir.dat <- file.path(outer_folder, icase)
   dir.create(file.path(outer_folder_output, icase), showWarnings = FALSE)
@@ -76,7 +77,8 @@ for (icase in cases) {
     build_models(
       run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
       use_initF = TRUE, dir.template = dir.template_current, agelen = agelen,
-      cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2), # based on what we were told the setting in the IBM was...
+      cwe = cwe,
+      M_val = 0.1, CV_vals = c(0.2, 0.2), # based on what we were told the setting in the IBM was...
       sel_vals = sel_vals, sel_phase = sel_phase
     )
   }
@@ -86,7 +88,8 @@ for (icase in cases) {
       run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
       use_initF = FALSE, dir.template = dir.template_current,
       agelen = agelen,
-      cwe = cwe, M_val = 0.1, CV_vals = c(0.1, 0.1), # base on what we were told the setting in the IBM was
+      cwe = cwe,
+      M_val = 0.1, CV_vals = c(0.1, 0.1), # base on what we were told the setting in the IBM was
       sel_vals = sel_vals, sel_phase = sel_phase
     )
   }
@@ -96,7 +99,8 @@ for (icase in cases) {
       run = 1:n, updatedat = TRUE, dir = mydir_today_plat,
       use_initF = FALSE, dir.template = dir.template_current,
       agelen = agelen,
-      cwe = cwe, M_val = 0.1, CV_vals = c(0.2, 0.2), # base on what we were told the setting in the IBM was
+      cwe = cwe,
+      M_val = 0.1, CV_vals = c(0.2, 0.2), # base on what we were told the setting in the IBM was
       sel_vals = sel_vals, sel_phase = sel_phase
     )
   }
@@ -123,8 +127,15 @@ for (icase in cases) {
   }
 } # end loop over cases to build models
 
+### 2022 Dec 27: unexplained error 
+### (that did not stop things from working beyond that point)
+# Error in file(file, "rt") : cannot open the connection
+# In addition: There were 50 or more warnings (use warnings() to see the first 50)
+
 # loop over cases to run models
-for (icase in cases) {
+# NOTE: this step took about 16 hours for 4 cases (3A to 4B)
+#for (icase in cases) {
+for (icase in cases[grepl("L9545", cases)]) { # subset for those with wider selectivity (Dec 2022 re-run)
   mydir_today_plat <- file.path(outer_folder_output, icase, paste0("runs_plats_", run_date))
   mydir_today_no_plat <- file.path(outer_folder_output, icase, paste0("runs_no_plats_", run_date))
   # run platoons model

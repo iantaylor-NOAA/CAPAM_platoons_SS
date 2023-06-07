@@ -1,13 +1,6 @@
-# Process otupt from the simulations run in 1_
-
-# to do: run this. 2 runs failed, need to look at why and see if there is a way
-# to prevent or if runs should just be thrown out?
-# do this tomorrow.
-
-# edit to work with new location.
+# Process otupt from the simulations run in 1_run_sims...
 
 # load pkgs, set options ----
-# library(r4ss)
 source(file.path("code", "SS_run_functions.R"))
 
 # fixed values ----
@@ -15,18 +8,18 @@ mydir <- getwd()
 outer_folder <- file.path(mydir, "Scenarios")
 outer_folder_output <- file.path(mydir, "output", basename(outer_folder))
 cases <- list.dirs(outer_folder_output, full.names = FALSE, recursive = FALSE)
-run_date <- "2022_10_04"
+run_date <- "2022_12_27"
 saved <- TRUE
 
 Rdata_folder <- file.path("Rdata_output", basename(outer_folder))
 
 # load saved output, create csvs ----
-for (icase in cases) {
-  mydir.dat <- file.path(outer_folder, icase)
-  out_ab <- file.path(mydir.dat, "..", "ResultsSSab", icase)
-  out_pl <- file.path(mydir.dat, "..", "ResultsSSpl", icase)
-  dir.create(out_ab, showWarnings = FALSE)
-  dir.create(out_pl, showWarnings = FALSE)
+#for (icase in cases) {
+for (icase in cases[grepl("L9545", cases)]) { # subset for those with wider selectivity (Dec 2022 re-run)
+  out_ab <- file.path(outer_folder, paste0("ResultsSSab_", run_date), icase)
+  out_pl <- file.path(outer_folder, paste0("ResultsSSpl_", run_date), icase)
+  dir.create(out_ab, showWarnings = FALSE, recursive = TRUE)
+  dir.create(out_pl, showWarnings = FALSE, recursive = TRUE)
   if (saved) {
     load(file.path(Rdata_folder, paste0("case", icase, "_stuff_", run_date, ".Rdata")))
   } else {
