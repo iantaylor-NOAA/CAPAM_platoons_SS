@@ -377,6 +377,30 @@ add30plus <- function(modsum, modlist) {
   modsum
 }
 
+add40plus <- function(modsum, modlist) {
+  n <- modsum[["n"]]
+  # add biomass and number of 40+ cm fish to SSsummarize output
+  # summarize 40cm+ fish across models
+  modsum$N40plus <- NULL
+  modsum$B40plus <- NULL
+  for (imod in 1:n) {
+    info40plus <- get30plus(modlist[[imod]], min = 40) # min = 40 determines limit
+    modsum$N40plus <- cbind(modsum$N40plus, info40plus$N30plus) # N30plus is really N40plus
+    modsum$B40plus <- cbind(modsum$B40plus, info40plus$B30plus) # B30plus is really B40plus
+  }
+  # convert to data.frame
+  modsum$N40plus <- as.data.frame(modsum$N40plus)
+  modsum$B40plus <- as.data.frame(modsum$B40plus)
+  # rename columns
+  names(modsum$N40plus) <- paste0("run", 1:n)
+  names(modsum$B40plus) <- paste0("run", 1:n)
+  # add year column at the end
+  modsum$N40plus$Yr <- info40plus$Yr
+  modsum$B40plus$Yr <- info40plus$Yr
+  # return modified data frame
+  modsum
+}
+
 re <- function(est, tru) {
   (est - tru) / tru
 }
@@ -400,4 +424,25 @@ get_params_on_bounds <- function(dir) {
       out$parameters$Status == "LO", ], Status
   )
   params_on_bounds <- paste0(params_on_bounds$Label, collapse = ", ")
+}
+
+get_F_rates <- function(modlist) {
+  require(tidyverse)
+
+  # length(modlist_plat) # has 100 elements for the different runs in each scenario
+  # modlist_plat[[1]]$exploitation %>% head()
+
+  # create placeholder for data frame summarizing
+  exploitation_table <- NULL
+  runs <- 1:100
+
+  extract_fishery <- function(run_number) {
+    x <- modlist_plat[[run_number]]$exploitation %>% dplyr::select(fishery)
+    names(x) <- paste0("run", run_number)
+    x
+  }
+
+  table_of_fishery_output <- purrr::map_dfc(runs, extract_fishery)
+
+  return(invisible(table_of_fishery_output))
 }
