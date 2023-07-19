@@ -8,14 +8,16 @@ mydir <- getwd()
 outer_folder <- file.path(mydir, "Scenarios")
 outer_folder_output <- file.path(mydir, "output", basename(outer_folder))
 cases <- list.dirs(outer_folder_output, full.names = FALSE, recursive = FALSE)
-run_date <- "2022_12_27"
+run_date <- "2022_10_04"
+#run_date <- "2022_12_27"
 saved <- TRUE
 
 Rdata_folder <- file.path("Rdata_output", basename(outer_folder))
 
 # load saved output, create csvs ----
 #for (icase in cases) {
-for (icase in cases[grepl("L9545", cases)]) { # subset for those with wider selectivity (Dec 2022 re-run)
+#for (icase in cases[grepl("L9545", cases)]) { # subset for those with wider selectivity (Dec 2022 re-run)
+for (icase in cases[!grepl("L9545", cases)]) { # subset for those with wider selectivity (Oct 2022 run)
   out_ab <- file.path(outer_folder, paste0("ResultsSSab_", run_date), icase)
   out_pl <- file.path(outer_folder, paste0("ResultsSSpl_", run_date), icase)
   dir.create(out_ab, showWarnings = FALSE, recursive = TRUE)
@@ -48,10 +50,17 @@ for (icase in cases[grepl("L9545", cases)]) { # subset for those with wider sele
   # summarize 30cm+ fish across models
   modsum1 <- add30plus(modsum1, modlist_plat)
   modsum2 <- add30plus(modsum2, modlist_no_plat)
+  # summarize 40cm+ fish (added July 2023)
+  modsum1 <- add40plus(modsum1, modlist_plat)
+  modsum2 <- add40plus(modsum2, modlist_no_plat)
 
   # format the output
   partable1 <- format_params(modsum1)
   partable2 <- format_params(modsum2)
+
+  # get the F rates
+  F_rates1 <- get_F_rates(modlist_plat)
+  F_rates2 <- get_F_rates(modlist_no_plat)
 
   ## SSsummary_platoons <- modsum1
   ## SSsummary_NOplatoons <- modsum2
@@ -84,12 +93,22 @@ for (icase in cases[grepl("L9545", cases)]) { # subset for those with wider sele
     file = file.path(out_ab, "SS_recruitment.csv"),
     row.names = FALSE
   )
-  write.csv(modsum1$Fvalue,
+  write.csv(modsum1$Fvalue, # exploitation
     file = file.path(out_pl, "SS_exploitation.csv"),
     row.names = FALSE
   )
-  write.csv(modsum2$Fvalue,
+  write.csv(modsum2$Fvalue, # exploitation
     file = file.path(out_ab, "SS_exploitation.csv"),
+    row.names = FALSE
+  )  
+  write.csv(
+    F_rates1, # instantaneous F
+    file = file.path(out_pl, "SS_fishing_mortality.csv"),
+    row.names = FALSE
+  )
+  write.csv(#modsum2$Fvalue, # exploitation
+    F_rates2, # instantaneous F
+    file = file.path(out_ab, "SS_fishing_mortality.csv"),
     row.names = FALSE
   )
   write.csv(modsum1$N30plus,
@@ -108,4 +127,23 @@ for (icase in cases[grepl("L9545", cases)]) { # subset for those with wider sele
     file = file.path(out_ab, "SS_biomass30plus.csv"),
     row.names = FALSE
   )
+  # 40cm plus added July 2023
+  write.csv(modsum1$N40plus,
+    file = file.path(out_pl, "SS_numbers40plus.csv"),
+    row.names = FALSE
+  )
+  write.csv(modsum2$N40plus,
+    file = file.path(out_ab, "SS_numbers40plus.csv"),
+    row.names = FALSE
+  )
+  write.csv(modsum1$B40plus,
+    file = file.path(out_pl, "SS_biomass40plus.csv"),
+    row.names = FALSE
+  )
+  write.csv(modsum2$B40plus,
+    file = file.path(out_ab, "SS_biomass40plus.csv"),
+    row.names = FALSE
+  )
+
+
 }

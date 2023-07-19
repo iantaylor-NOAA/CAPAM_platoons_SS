@@ -437,12 +437,17 @@ get_F_rates <- function(modlist) {
   runs <- 1:100
 
   extract_fishery <- function(run_number) {
-    x <- modlist_plat[[run_number]]$exploitation %>% dplyr::select(fishery)
+    x <- modlist[[run_number]]$exploitation %>% 
+      dplyr::select(Yr, fishery) %>% 
+      dplyr::filter(Yr %in% 1990:2019) %>% 
+      dplyr::group_by(Yr) %>% 
+      dplyr::summarize(fishery_ave = mean(fishery)) %>%
+      dplyr::select(fishery_ave)
     names(x) <- paste0("run", run_number)
-    x
+    return(x)
   }
 
-  table_of_fishery_output <- purrr::map_dfc(runs, extract_fishery)
+  table_of_fishery_F <- purrr::map_dfc(runs, extract_fishery)
 
-  return(invisible(table_of_fishery_output))
+  return(invisible(table_of_fishery_F))
 }
